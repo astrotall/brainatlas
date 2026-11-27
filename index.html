@@ -1,0 +1,294 @@
+<!doctype html>
+<html lang="ru">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="theme-color" content="#eef4f1">
+  <meta name="description" content="Интерактивная нейробиология для школьников и студентов: анатомия мозга, нейроны, память, сон, обучение и научные ресурсы.">
+  <title>Neuroctivity — изучай мозг</title>
+  <script>
+    try{document.documentElement.dataset.theme=localStorage.getItem('neuroctivity-theme')||'light';}catch(error){document.documentElement.dataset.theme='light';}
+  </script>
+  <style>
+    :root{color-scheme:light;--ink:#172a2c;--muted:#54696b;--paper:#f6f8f6;--surface:#fff;--line:#dce7e3;--green:#14685d;--lime:#c8ed83;--blue:#dcecff;--peach:#ffe4d5;--shadow:0 16px 46px #193b3512}
+    *{box-sizing:border-box}
+    html{scroll-behavior:smooth}
+    body{margin:0;background:var(--paper);color:var(--ink);font:16px/1.65 system-ui,-apple-system,BlinkMacSystemFont,"Segoe UI",sans-serif}
+    a{color:inherit}
+    a:focus-visible,button:focus-visible{outline:3px solid #e29b5d;outline-offset:3px}
+    .wrap{width:min(1120px,calc(100% - 40px));margin:auto}
+    .topbar{position:sticky;top:0;z-index:5;background:#f6f8f6ed;border-bottom:1px solid var(--line);backdrop-filter:blur(14px)}
+    .nav{height:72px;display:flex;align-items:center;gap:26px}
+    .brand{display:flex;align-items:center;gap:10px;margin-right:auto;text-decoration:none;font-weight:850;letter-spacing:-.04em;font-size:1.16rem}
+    .brand-mark{display:grid;place-items:center;width:34px;height:34px;border-radius:12px;background:var(--green);color:white;font-size:19px}
+    .brand-text{display:flex;flex-direction:column;line-height:1.05}
+    .brand-tag{margin-top:3px;color:var(--green);font-size:.6rem;font-weight:750;letter-spacing:.12em;white-space:nowrap}
+    .navlinks{display:flex;gap:22px;align-items:center}
+    .navlinks a{text-decoration:none;color:var(--muted);font-size:.92rem;font-weight:650}
+    .navlinks a:hover{color:var(--green)}
+    .lang{border:1px solid var(--line);background:var(--surface);border-radius:999px;padding:8px 12px;font:inherit;font-size:.8rem;font-weight:750;cursor:pointer}
+    .theme-toggle{width:38px;height:38px;border:1px solid var(--line);border-radius:50%;background:var(--surface);color:var(--ink);font:inherit;font-size:1.05rem;font-weight:750;cursor:pointer}
+    .hero{padding:80px 0 74px;background:radial-gradient(ellipse at 86% 20%,#c9e8dd 0,transparent 36%),linear-gradient(130deg,#edf5f2,#f8f8f1 70%)}
+    .hero-grid{display:grid;grid-template-columns:1.1fr .9fr;gap:52px;align-items:center}
+    .eyebrow{display:inline-flex;align-items:center;gap:8px;margin:0 0 18px;color:var(--green);font-size:.78rem;font-weight:850;letter-spacing:.13em;text-transform:uppercase}
+    .eyebrow:before{content:"";width:8px;height:8px;border-radius:50%;background:#75a944}
+    h1,h2,h3,p{margin-top:0}
+    h1{max-width:680px;margin-bottom:20px;font-size:clamp(2.8rem,6.6vw,5.25rem);line-height:.98;letter-spacing:-.065em}
+    .hero-copy{max-width:590px;color:var(--muted);font-size:1.14rem}
+    .actions{display:flex;flex-wrap:wrap;gap:12px;margin-top:28px}
+    .button{display:inline-flex;justify-content:center;align-items:center;gap:9px;padding:13px 19px;border:1px solid var(--green);border-radius:999px;background:var(--green);color:white;font-weight:750;text-decoration:none;transition:transform .18s,background .18s}
+    .button:hover{transform:translateY(-2px);background:#0d554b}
+    .button.secondary{background:var(--surface);color:var(--green);border-color:var(--line)}
+    .brain-card{position:relative;min-height:340px;padding:12px;border:1px solid #fff;border-radius:30px;background:#2a2c31;box-shadow:var(--shadow);overflow:hidden}
+    .brain-poster{position:absolute;left:12px;top:12px;width:calc(100% - 24px);height:316px;object-fit:cover;border-radius:22px;display:block}
+    .brain-atlas{position:relative;display:block;width:100%;height:316px;border:0;border-radius:22px;background:transparent}
+    .brain-card.static .brain-atlas{display:none}
+    .brain-open{position:absolute;right:24px;bottom:22px;padding:8px 12px;border:1px solid var(--line);border-radius:999px;background:var(--surface);color:var(--green);font-size:.78rem;font-weight:750;text-decoration:none}
+    .brain-open:hover{background:var(--green);color:white}
+    section{padding:76px 0}
+    .section-head{display:flex;align-items:end;justify-content:space-between;gap:24px;margin-bottom:28px}
+    .section-head h2{max-width:640px;margin:0;font-size:clamp(2rem,4vw,3rem);line-height:1.08;letter-spacing:-.045em}
+    .section-head p{max-width:460px;margin:0;color:var(--muted)}
+    .course-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:16px}
+    .course{min-height:230px;padding:24px;border:1px solid var(--line);border-radius:22px;background:var(--surface);box-shadow:0 8px 24px #193b3508}
+    .course:nth-child(3n+1){background:linear-gradient(145deg,#fff,#eaf5f0)}
+    .course:nth-child(3n+2){background:linear-gradient(145deg,#fff,#edf3ff)}
+    .course:nth-child(3n){background:linear-gradient(145deg,#fff,#fff1e8)}
+    .course .num{display:inline-grid;place-items:center;width:34px;height:34px;margin-bottom:18px;border-radius:12px;background:#ffffffbd;color:var(--green);font-size:.78rem;font-weight:850}
+    .course h3{margin-bottom:8px;font-size:1.2rem;letter-spacing:-.025em}
+    .course p{margin:0;color:var(--muted);font-size:.94rem}
+    .band{background:#eaf1ed}
+    .path-grid{display:grid;grid-template-columns:repeat(4,1fr);gap:14px}
+    .path{padding:20px;border-radius:18px;background:#ffffffb8}
+    .path b{display:block;margin-bottom:7px;color:var(--green)}
+    .path p{margin:0;color:var(--muted);font-size:.92rem}
+    .study-callout{display:flex;justify-content:space-between;align-items:center;gap:24px;margin-top:28px;padding:24px 26px;border-radius:22px;background:var(--ink);color:#fff}
+    .study-callout p{margin:4px 0 0;color:#d3e2df}
+    .study-callout .button{flex:none;background:var(--lime);border-color:var(--lime);color:var(--ink)}
+    .study-callout .button.secondary{background:transparent;border-color:#78908b;color:white}
+    .resource-grid{display:grid;grid-template-columns:repeat(2,1fr);gap:16px}
+    .resource-group{padding:22px;border:1px solid var(--line);border-radius:20px;background:var(--surface)}
+    .resource-group h3{display:flex;justify-content:space-between;gap:12px;margin:0 0 14px;font-size:1.06rem}
+    .level{color:var(--muted);font-size:.73rem;font-weight:700}
+    .resource-group ul{display:grid;gap:9px;margin:0;padding:0;list-style:none}
+    .resource-group li{padding-top:9px;border-top:1px solid #edf1ef}
+    .resource-group a{color:var(--green);font-weight:680;text-decoration-thickness:1px;text-underline-offset:3px}
+    .resource-group a:hover{color:#093e38}
+    .resource-group small{display:block;color:var(--muted);font-size:.82rem}
+    .notice{margin:22px 0 0;padding:16px 18px;border-left:3px solid #87a85b;border-radius:0 12px 12px 0;background:#f1f5ea;color:var(--muted);font-size:.9rem}
+    .footer{padding:30px 0 40px;border-top:1px solid var(--line);color:var(--muted);font-size:.88rem}
+    .footer-row{display:flex;justify-content:space-between;gap:20px}
+    [data-en][hidden],[data-ru][hidden]{display:none}
+    html[data-theme="dark"]{color-scheme:dark;--ink:#e7efec;--muted:#a9bbb6;--paper:#121a1b;--surface:#1c2829;--line:#344344;--green:#84c7ad;--lime:#c8ed83;--blue:#263548;--peach:#49352d;--shadow:0 16px 46px #0005}
+    html[data-theme="dark"] .topbar{background:#121a1bed}
+    html[data-theme="dark"] .hero{background:radial-gradient(ellipse at 86% 20%,#28453e 0,transparent 36%),linear-gradient(130deg,#172523,#1b2020 70%)}
+    html[data-theme="dark"] .brain-card{border-color:#344344;background:#2a2c31}
+    html[data-theme="dark"] .course:nth-child(3n+1){background:linear-gradient(145deg,#1c2829,#20352f)}
+    html[data-theme="dark"] .course:nth-child(3n+2){background:linear-gradient(145deg,#1c2829,#202c3b)}
+    html[data-theme="dark"] .course:nth-child(3n){background:linear-gradient(145deg,#1c2829,#3a2b26)}
+    html[data-theme="dark"] .band{background:#1a2526}
+    html[data-theme="dark"] .path{background:#263333}
+    html[data-theme="dark"] .study-callout{background:#263333}
+    html[data-theme="dark"] .study-callout p{color:#c1d2cd}
+    html[data-theme="dark"] .study-callout .button{background:var(--lime);border-color:var(--lime);color:#172a2c}
+    html[data-theme="dark"] .study-callout .button.secondary{background:transparent;border-color:#78908b;color:white}
+    html[data-theme="dark"] .resource-group li{border-color:#344344}
+    html[data-theme="dark"] .resource-group a:hover{color:#b4e5cf}
+    html[data-theme="dark"] .notice{border-left-color:#8fae99;background:#25322b;color:#c0cec8}
+    html[data-theme="dark"] .brand-mark{color:#10201a}
+    html[data-theme="dark"] .brain-open{background:#1c2829;color:#b9e6d2}
+    @media(max-width:850px){.hero-grid{grid-template-columns:1fr;gap:28px}.brain-card{min-height:280px}.brain-atlas,.brain-poster{height:256px}.course-grid{grid-template-columns:repeat(2,1fr)}.path-grid{grid-template-columns:repeat(2,1fr)}.section-head{display:block}.section-head p{margin-top:12px}}
+    @media(max-width:620px){.wrap{width:min(100% - 28px,1120px)}.nav{height:62px;gap:9px}.navlinks{display:none}.hero{padding:56px 0}.course-grid,.resource-grid{grid-template-columns:1fr}.course{min-height:0}.study-callout,.footer-row{align-items:flex-start;flex-direction:column}.study-callout .button{width:100%}section{padding:58px 0}.brain-card{min-height:230px;padding:8px}.brain-atlas{height:214px}.brain-open{right:16px;bottom:16px}.theme-toggle{width:34px;height:34px}}
+    @media(prefers-reduced-motion:reduce){html{scroll-behavior:auto}*,*:before,*:after{transition:none!important}}
+  </style>
+</head>
+<body>
+  <header class="topbar">
+    <div class="wrap nav">
+      <a class="brand" href="#top"><span class="brand-mark" aria-hidden="true">n</span><span class="brand-text">Neuroctivity<small class="brand-tag">we are CONNECTED.</small></span></a>
+      <nav class="navlinks" aria-label="Навигация">
+        <a href="#course"><span data-ru>Учебные темы</span><span data-en hidden>Topics</span></a>
+        <a href="#atlas"><span data-ru>3D-атлас</span><span data-en hidden>3D atlas</span></a>
+        <a href="#resources"><span data-ru>Библиотека</span><span data-en hidden>Library</span></a>
+      </nav>
+      <button class="lang" id="lang-toggle" type="button" aria-label="Switch language">RU / EN</button>
+      <button class="theme-toggle" id="theme-toggle" type="button" aria-label="Switch to dark theme" title="Switch to dark theme">☾</button>
+    </div>
+  </header>
+
+  <main id="top">
+    <section class="hero">
+      <div class="wrap hero-grid">
+        <div>
+          <p class="eyebrow"><span data-ru>Нейробиология для любознательных</span><span data-en hidden>Neuroscience for curious minds</span></p>
+          <h1><span data-ru>Мозг — не загадка. Это система, которую можно изучить.</span><span data-en hidden>The brain isn't a mystery. It's a system you can explore.</span></h1>
+          <p class="hero-copy"><span data-ru>Изучай нейроны, органы чувств, память, сон и движение через понятные объяснения, интерактивный атлас и научные источники.</span><span data-en hidden>Explore neurons, senses, memory, sleep, and movement through clear explanations, an interactive atlas, and research resources.</span></p>
+          <div class="actions">
+            <a class="button" href="#course"><span data-ru>Начать изучение</span><span data-en hidden>Start learning</span> <span aria-hidden="true">→</span></a>
+            <a class="button secondary" href="mozg-3d-atlas-2.html"><span data-ru>Открыть 3D-атлас</span><span data-en hidden>Open 3D atlas</span></a>
+            <a class="button secondary" href="workbook.html"><span data-ru>Открыть тетрадь</span><span data-en hidden>Open workbook</span></a>
+          </div>
+        </div>
+        <div class="brain-card">
+          <img class="brain-poster" src="atlas-preview.jpg" width="880" height="632" alt="Полупрозрачная 3D-модель мозга: кора и глубинные структуры">
+          <iframe class="brain-atlas" id="brainFrame" src="mozg-3d-atlas-2.html?embed=1&amp;mode=p:memory&amp;v=5" title="Интерактивная полупрозрачная 3D-модель мозга" loading="eager" allow="fullscreen"></iframe>
+          <a class="brain-open" href="mozg-3d-atlas-2.html"><span data-ru>Открыть полный атлас ↗</span><span data-en hidden>Open full atlas ↗</span></a>
+        </div>
+      </div>
+    </section>
+
+    <section id="course">
+      <div class="wrap">
+        <div class="section-head">
+          <h2><span data-ru>Собери карту знаний — от клетки до целого мозга</span><span data-en hidden>Build your brain map — from cells to the whole brain</span></h2>
+          <p><span data-ru>Начинай с основ или переходи сразу к интересующей теме. В каждом разделе связываются структура, функция и доказательства.</span><span data-en hidden>Start with the basics or jump to a topic. Each section connects anatomy, function, and evidence.</span></p>
+        </div>
+        <div class="course-grid">
+          <article class="course"><span class="num">01</span><h3><span data-ru>Нейрон и электрический сигнал</span><span data-en hidden>Neurons and electrical signals</span></h3><p><span data-ru>Части нейрона, потенциал действия, миелин и передача сигнала.</span><span data-en hidden>Neuron structure, action potentials, myelin, and signal transmission.</span></p></article>
+          <article class="course"><span class="num">02</span><h3><span data-ru>Синапсы и нейромедиаторы</span><span data-en hidden>Synapses and neurotransmitters</span></h3><p><span data-ru>Как клетки обмениваются сигналами и меняют силу связей.</span><span data-en hidden>How cells communicate and adjust the strength of connections.</span></p></article>
+          <article class="course"><span class="num">03</span><h3><span data-ru>Анатомия и функциональные сети</span><span data-en hidden>Anatomy and functional networks</span></h3><p><span data-ru>Кора, подкорковые структуры и проводящие пути — без упрощения мозга до «одной зоны на одну функцию».</span><span data-en hidden>Cortex, subcortical structures, and pathways — without reducing the brain to one area per function.</span></p></article>
+          <article class="course"><span class="num">04</span><h3><span data-ru>Ощущение и восприятие</span><span data-en hidden>Sensation and perception</span></h3><p><span data-ru>Как зрительные, слуховые и телесные сигналы проходят от рецепторов к мозгу.</span><span data-en hidden>How visual, auditory, and body signals travel from receptors to the brain.</span></p></article>
+          <article class="course"><span class="num">05</span><h3><span data-ru>Память, обучение и пластичность</span><span data-en hidden>Memory, learning, and plasticity</span></h3><p><span data-ru>Кодирование, консолидация, извлечение и перестройка нейронных сетей.</span><span data-en hidden>Encoding, consolidation, retrieval, and changes in neural networks.</span></p></article>
+          <article class="course"><span class="num">06</span><h3><span data-ru>Сон, биоритмы и движение</span><span data-en hidden>Sleep, biological rhythms, and movement</span></h3><p><span data-ru>Как мозг организует циклы сна и бодрствования, координацию и точность действий.</span><span data-en hidden>How the brain organizes sleep–wake cycles, coordination, and precise action.</span></p></article>
+        </div>
+        <p class="notice"><span data-ru>Материалы помогают повторять основы, связанные с ЕГЭ по биологии, а также GCSE/IGCSE, IB и AP по биологии. Это независимый учебный ресурс, не официальный банк заданий; сверяй подготовку с актуальной программой и рекомендациями преподавателя.</span><span data-en hidden>These materials support revision of concepts relevant to ЕГЭ Biology and GCSE/IGCSE, IB, and AP Biology. This is an independent learning resource, not an official question bank; check your revision against the current syllabus and teacher guidance.</span></p>
+      </div>
+    </section>
+
+    <section class="band" id="next-topics">
+      <div class="wrap">
+        <div class="section-head">
+          <h2><span data-ru>Что изучать дальше — за пределами мозга</span><span data-en hidden>What to explore next — beyond the brain</span></h2>
+          <p><span data-ru>Эти темы расширят курс до целостной биологии человека и дадут полезные связи с экзаменационными программами.</span><span data-en hidden>These topics expand the course into human biology and connect it with school exam syllabuses.</span></p>
+        </div>
+        <div class="course-grid">
+          <article class="course"><span class="num">01</span><h3><span data-ru>Спинной мозг и рефлексы</span><span data-en hidden>Spinal cord and reflexes</span></h3><p><span data-ru>Рефлекторные дуги, сенсорные и двигательные пути.</span><span data-en hidden>Reflex arcs, sensory pathways, and motor pathways.</span></p></article>
+          <article class="course"><span class="num">02</span><h3><span data-ru>Сенсорные системы</span><span data-en hidden>Sensory systems</span></h3><p><span data-ru>Зрение, слух, равновесие, осязание и работа рецепторов.</span><span data-en hidden>Vision, hearing, balance, touch, and receptor function.</span></p></article>
+          <article class="course"><span class="num">03</span><h3><span data-ru>Гормоны и гомеостаз</span><span data-en hidden>Hormones and homeostasis</span></h3><p><span data-ru>Эндокринная регуляция и поддержание постоянства внутренней среды.</span><span data-en hidden>Endocrine regulation and maintenance of the internal environment.</span></p></article>
+          <article class="course"><span class="num">04</span><h3><span data-ru>Мышцы и управление движением</span><span data-en hidden>Muscles and motor control</span></h3><p><span data-ru>Нервно-мышечное соединение, сокращение и обратная связь.</span><span data-en hidden>Neuromuscular junctions, contraction, and feedback.</span></p></article>
+          <article class="course"><span class="num">05</span><h3><span data-ru>Генетика и эволюция нервной системы</span><span data-en hidden>Genetics and evolution of the nervous system</span></h3><p><span data-ru>Наследование, развитие и сравнительная биология.</span><span data-en hidden>Inheritance, development, and comparative biology.</span></p></article>
+          <article class="course"><span class="num">06</span><h3><span data-ru>Методы научных исследований</span><span data-en hidden>Scientific research methods</span></h3><p><span data-ru>ЭЭГ, МРТ, фМРТ, экспериментальный дизайн и критическая оценка доказательств.</span><span data-en hidden>EEG, MRI, fMRI, experimental design, and critical appraisal of evidence.</span></p></article>
+        </div>
+      </div>
+    </section>
+
+    <section class="band" id="atlas">
+      <div class="wrap">
+        <div class="section-head">
+          <h2><span data-ru>Исследуй мозг в 3D</span><span data-en hidden>Explore the brain in 3D</span></h2>
+          <p><span data-ru>Поворачивай модель, выбирай структуры и смотри, как области объединяются в пути и функциональные системы: 28 структур, 13 процессов в анимации и 9 нейромедиаторов.</span><span data-en hidden>Rotate the model, pick structures and see how regions combine into pathways and functional systems: 28 structures, 13 animated processes and 9 neurotransmitters.</span></p>
+        </div>
+        <div class="path-grid">
+          <div class="path"><b><span data-ru>01 · Найди</span><span data-en hidden>01 · Find</span></b><p><span data-ru>Выбери область по названию или коснись её на модели.</span><span data-en hidden>Choose a region by name or select it on the model.</span></p></div>
+          <div class="path"><b><span data-ru>02 · Пойми</span><span data-en hidden>02 · Understand</span></b><p><span data-ru>Прочитай краткое описание функции и соседних структур.</span><span data-en hidden>Read a concise summary of its role and connected structures.</span></p></div>
+          <div class="path"><b><span data-ru>03 · Свяжи</span><span data-en hidden>03 · Connect</span></b><p><span data-ru>Проследи путь сигнала и соотнеси его с изучаемой темой.</span><span data-en hidden>Trace a signal pathway and connect it to the topic.</span></p></div>
+          <div class="path"><b><span data-ru>04 · Проверь</span><span data-en hidden>04 · Review</span></b><p><span data-ru>Закрепи знания вопросами и повторением терминов.</span><span data-en hidden>Review with short questions and key terms.</span></p></div>
+        </div>
+        <div class="study-callout">
+          <div><strong><span data-ru>Тетрадь и тематический тренажёр</span><span data-en hidden>Workbook and topic-based practice</span></strong><p><span data-ru>Ищи темы, записывай заметки и проходи короткие тесты с объяснениями.</span><span data-en hidden>Search topics, take notes, and try short quizzes with explanations.</span></p></div>
+          <a class="button" href="workbook.html"><span data-ru>Открыть тетрадь</span><span data-en hidden>Open workbook</span> →</a>
+          <a class="button secondary" href="kira.html"><span data-ru>Общий квиз</span><span data-en hidden>General quiz</span></a>
+        </div>
+      </div>
+    </section>
+
+    <section id="resources">
+      <div class="wrap">
+        <div class="section-head">
+          <h2><span data-ru>Научная библиотека</span><span data-en hidden>Science library</span></h2>
+          <p><span data-ru>Открытые атласы, образовательные материалы, статьи и видеолекции из списка команды проекта.</span><span data-en hidden>Open atlases, learning materials, papers, and lectures from the project team's resource list.</span></p>
+        </div>
+        <div class="resource-grid">
+          <article class="resource-group"><h3><span data-ru>Атласы и базы данных</span><span data-en hidden>Atlases and databases</span><span class="level">START HERE</span></h3><ul>
+            <li><a href="https://human.brain-map.org/" target="_blank" rel="noopener noreferrer">Allen Human Brain Atlas</a><small><span data-ru>Экспрессия генов, МРТ и инструменты просмотра данных.</span><span data-en hidden>Gene expression, MRI, and data viewers.</span></small></li>
+            <li><a href="https://www.humanbrainproject.eu/en/science-development/focus-areas/brain-atlases/" target="_blank" rel="noopener noreferrer">Human Brain Project · Brain Atlases</a><small>EBRAINS, BigBrain и атласы мозга.</small></li>
+            <li><a href="https://www.brainfacts.org/" target="_blank" rel="noopener noreferrer">BrainFacts.org</a><small><span data-ru>Объяснения по анатомии, функциям и методам нейронауки.</span><span data-en hidden>Accessible explainers on anatomy, function, and methods.</span></small></li>
+            <li><a href="https://alleninstitute.org/education/resources" target="_blank" rel="noopener noreferrer">Allen Institute · Education Resources</a><small><span data-ru>Бесплатные уроки и практические ресурсы для классов.</span><span data-en hidden>Free classroom lessons and hands-on resources.</span></small></li>
+            <li><a href="https://www.humanconnectome.org/" target="_blank" rel="noopener noreferrer">Human Connectome Project</a><small><span data-ru>Данные и инструменты для изучения связей мозга.</span><span data-en hidden>Data and tools for studying brain connectivity.</span></small></li>
+          </ul></article>
+          <article class="resource-group"><h3><span data-ru>Статьи и обзоры</span><span data-en hidden>Research papers and reviews</span><span class="level">ADVANCED</span></h3><ul>
+            <li><a href="https://pmc.ncbi.nlm.nih.gov/articles/10618102/" target="_blank" rel="noopener noreferrer">Memory engrams · PMC10618102</a><small><span data-ru>Обзор механизмов формирования и изменения памяти.</span><span data-en hidden>Review of how memories are formed and change.</span></small></li>
+            <li><a href="https://pubmed.ncbi.nlm.nih.gov/26876924/" target="_blank" rel="noopener noreferrer">PubMed · PMID 26876924</a><small><span data-ru>Библиографическая запись; используйте аннотацию и связанные материалы.</span><span data-en hidden>Bibliographic record; see the abstract and related resources.</span></small></li>
+            <li><a href="https://pmc.ncbi.nlm.nih.gov/articles/PMC12945457/" target="_blank" rel="noopener noreferrer">Memory across brain networks · PMC12945457</a><small><span data-ru>Перспективы системной консолидации памяти.</span><span data-en hidden>Perspectives on systems-level memory consolidation.</span></small></li>
+            <li><a href="https://pmc.ncbi.nlm.nih.gov/articles/PMC11234674/" target="_blank" rel="noopener noreferrer">Neuroplasticity review · PMC11234674</a><small><span data-ru>Обзор исследований пластичности и опыта.</span><span data-en hidden>Review of plasticity research and experience.</span></small></li>
+            <li><a href="https://pmc.ncbi.nlm.nih.gov/articles/PMC11852462/" target="_blank" rel="noopener noreferrer">Cerebral plasticity · PMC11852462</a><small><span data-ru>Обзор молекулярных аспектов нейропластичности.</span><span data-en hidden>Review of molecular aspects of brain plasticity.</span></small></li>
+            <li><a href="https://pmc.ncbi.nlm.nih.gov/articles/PMC9700665/" target="_blank" rel="noopener noreferrer">Synaptic plasticity · PMC9700665</a><small><span data-ru>Механизмы и способы изучения синаптической пластичности.</span><span data-en hidden>Mechanisms and approaches for studying synaptic plasticity.</span></small></li>
+            <li><a href="https://www.brainfacts.org/brain-anatomy-and-function/anatomy/2012/mapping-the-brain" target="_blank" rel="noopener noreferrer">Mapping the Brain · BrainFacts</a><small><span data-ru>Вводный обзор строения мозга и основных областей.</span><span data-en hidden>Introductory overview of brain structures and regions.</span></small></li>
+          </ul></article>
+          <article class="resource-group"><h3><span data-ru>Видео и лекции</span><span data-en hidden>Videos and lectures</span><span class="level">WATCH & DISCUSS</span></h3><ul>
+            <li><a href="https://www.youtube.com/watch?v=0qlgd8HLn_M" target="_blank" rel="noopener noreferrer">YouTube · 0qlgd8HLn_M</a></li>
+            <li><a href="https://www.youtube.com/watch?v=9UHAOi7NxOk" target="_blank" rel="noopener noreferrer">YouTube · 9UHAOi7NxOk</a></li>
+            <li><a href="https://www.youtube.com/watch?v=WiLhAOaBkSA" target="_blank" rel="noopener noreferrer">YouTube · WiLhAOaBkSA</a></li>
+            <li><a href="https://www.ted.com/talks/russell_foster_why_do_we_sleep" target="_blank" rel="noopener noreferrer">TED · Russell Foster: Why do we sleep?</a></li>
+            <li><a href="https://www.ted.com/talks/jill_bolte_taylor_my_stroke_of_insight" target="_blank" rel="noopener noreferrer">TED · Jill Bolte Taylor: My stroke of insight</a></li>
+            <li><a href="https://vk.com/anokhinfans?z=video-74058720_171123828%2Fc2aaf0069b5df5f300" target="_blank" rel="noopener noreferrer">VK Видео · Канал Института мозга</a></li>
+            <li><a href="https://rutube.ru/video/3b2c1d38bffc44663fc6123ff728849e/" target="_blank" rel="noopener noreferrer">Rutube · видеолекция</a></li>
+            <li><a href="https://neuro.hse.ru/videos" target="_blank" rel="noopener noreferrer">НИУ ВШЭ · видеолекции по нейронауке</a></li>
+            <li><a href="https://www.neurobiology.ru/doc/index.php?ID=49" target="_blank" rel="noopener noreferrer">Neurobiology.ru · лекции и материалы</a></li>
+          </ul></article>
+          <article class="resource-group"><h3><span data-ru>Научные библиотеки</span><span data-en hidden>Research libraries</span><span class="level">LOOK UP</span></h3><ul>
+            <li><a href="https://pubmed.ncbi.nlm.nih.gov/" target="_blank" rel="noopener noreferrer">PubMed</a><small><span data-ru>Поиск биомедицинских публикаций.</span><span data-en hidden>Search biomedical publications.</span></small></li>
+            <li><a href="https://pmc.ncbi.nlm.nih.gov/" target="_blank" rel="noopener noreferrer">PubMed Central</a><small><span data-ru>Полные тексты статей в открытом доступе.</span><span data-en hidden>Open-access full-text articles.</span></small></li>
+            <li><a href="https://www.nature.com/subjects/neuroscience" target="_blank" rel="noopener noreferrer">Nature · Neuroscience</a></li>
+            <li><a href="https://www.science.org/" target="_blank" rel="noopener noreferrer">Science</a></li>
+            <li><a href="https://www.frontiersin.org/journals/neuroscience" target="_blank" rel="noopener noreferrer">Frontiers in Neuroscience</a></li>
+            <li><a href="https://neuro.hse.ru/" target="_blank" rel="noopener noreferrer">НИУ ВШЭ · Нейронауки</a></li>
+          </ul></article>
+        </div>
+        <p class="notice"><span data-ru>Статьи и внешние видео открываются на сайтах издателей и авторов; их содержание и возрастная уместность могут различаться. Для уровня GCSE/IGCSE, IB и AP используйте эти материалы как дополнение к школьной программе и обсуждайте сложные публикации с преподавателем.</span><span data-en hidden>Articles and videos open on publisher and creator websites; their content and age suitability may vary. For GCSE/IGCSE, IB, and AP, use them as supplements to your course and discuss advanced papers with a teacher.</span></p>
+      </div>
+    </section>
+  </main>
+  <footer class="footer"><div class="wrap footer-row"><span>Neuroctivity · <span data-ru>Изучаем мозг через биологию и научные данные</span><span data-en hidden>Learning about the brain through biology and evidence</span></span><a href="#top"><span data-ru>Наверх ↑</span><span data-en hidden>Back to top ↑</span></a></div></footer>
+  <script>
+    const languageButton = document.getElementById('lang-toggle');
+    const themeButton = document.getElementById('theme-toggle');
+    let language = 'ru';
+    try{language=localStorage.getItem('conn_lang')==='en'?'en':'ru';}catch(error){console.warn('Could not read the saved language.',error);}
+    function setLanguage(next){
+      language=next;
+      document.documentElement.lang=language;
+      document.querySelectorAll('[data-ru]').forEach(node=>{node.hidden=language!=='ru';});
+      document.querySelectorAll('[data-en]').forEach(node=>{node.hidden=language!=='en';});
+      languageButton.setAttribute('aria-label',language==='ru'?'Switch language to English':'Сменить язык на русский');
+      try{localStorage.setItem('conn_lang',language);}catch(error){console.warn('Could not save the selected language.',error);}
+    }
+    if(language!=='ru')setLanguage(language);
+    function setTheme(theme){
+      const current=theme==='dark'?'dark':'light';
+      document.documentElement.dataset.theme=current;
+      themeButton.textContent=current==='dark'?'☀':'☾';
+      themeButton.setAttribute('aria-label',current==='dark'?'Switch to light theme':'Switch to dark theme');
+      themeButton.title=current==='dark'?'Switch to light theme':'Switch to dark theme';
+    }
+    setTheme(document.documentElement.dataset.theme);
+    themeButton.addEventListener('click',()=>{
+      const next=document.documentElement.dataset.theme==='dark'?'light':'dark';
+      setTheme(next);
+      try{localStorage.setItem('neuroctivity-theme',next);}catch(error){console.warn('Could not save the selected theme.',error);}
+    });
+    window.addEventListener('storage',event=>{
+      if(event.key==='neuroctivity-theme'&&event.newValue)setTheme(event.newValue);
+    });
+    languageButton.addEventListener('click', () => {
+      setLanguage(language === 'ru' ? 'en' : 'ru');
+    });
+    /* Встроенный атлас: если браузер заблокировал кадр (заголовки) или он не загрузился,
+       вместо серой заглушки остаётся картинка-превью; ссылка на полный атлас работает всегда.
+       Заблокированный кадр для скрипта «чужой» (contentDocument === null) — это и есть признак. */
+    (function(){
+      const frame=document.getElementById('brainFrame'), card=frame&&frame.closest('.brain-card');
+      if(!frame||!card)return;
+      let tries=0;
+      const timer=setInterval(()=>{
+        tries++;
+        let doc=null;
+        try{doc=frame.contentDocument;}catch(error){doc=null;}
+        if(!doc){card.classList.add('static');clearInterval(timer);return;}
+        if(doc.getElementById('brain3d')){clearInterval(timer);return;}
+        if(tries>=20){card.classList.add('static');clearInterval(timer);}
+      },500);
+    })();
+  </script>
+</body>
+</html>

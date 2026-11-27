@@ -1,0 +1,184 @@
+<!doctype html>
+<html lang="ru">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="description" content="Интерактивный тренажёр по нейробиологии: нейроны, синапсы, анатомия, память и научные методы.">
+  <title>Neuroctivity · Учебный тренажёр</title>
+  <script>
+    try{document.documentElement.dataset.theme=localStorage.getItem('neuroctivity-theme')||'light';}catch(error){document.documentElement.dataset.theme='light';}
+  </script>
+  <style>
+    :root{--ink:#172a2c;--muted:#54696b;--paper:#f3f7f4;--card:#fff;--line:#dce7e3;--green:#14685d;--lime:#c8ed83}
+    *{box-sizing:border-box}
+    body{margin:0;background:var(--paper);color:var(--ink);font:16px/1.6 system-ui,-apple-system,BlinkMacSystemFont,"Segoe UI",sans-serif}
+    .wrap{width:min(760px,calc(100% - 32px));margin:auto}
+    header{padding:18px 0;border-bottom:1px solid var(--line);background:#ffffffb8}
+    .bar{display:flex;align-items:center;justify-content:space-between;gap:14px}
+    a{color:var(--green);font-weight:700;text-decoration-thickness:1px;text-underline-offset:3px}
+    button{font:inherit}
+    button:focus-visible,a:focus-visible{outline:3px solid #e29b5d;outline-offset:3px}
+    .lang,.restart{border:1px solid var(--line);border-radius:999px;background:var(--card);padding:9px 13px;color:var(--ink);font-weight:750;cursor:pointer}
+    .theme-toggle{width:38px;height:38px;border:1px solid var(--line);border-radius:50%;background:var(--card);color:var(--ink);font:inherit;font-size:1.05rem;font-weight:750;cursor:pointer}
+    main{padding:52px 0}
+    .eyebrow{margin:0 0 8px;color:var(--green);font-size:.77rem;font-weight:850;letter-spacing:.13em;text-transform:uppercase}
+    h1{margin:0;font-size:clamp(2rem,6vw,3.2rem);line-height:1.04;letter-spacing:-.05em}
+    .intro{margin:14px 0 26px;color:var(--muted)}
+    .quiz{padding:clamp(20px,5vw,36px);border:1px solid var(--line);border-radius:24px;background:var(--card);box-shadow:0 18px 48px #193b3510}
+    .quiz-head{display:flex;align-items:center;justify-content:space-between;gap:14px;margin-bottom:22px}
+    .progress{height:8px;overflow:hidden;border-radius:20px;background:#eaf0ed}
+    .progress span{display:block;width:0;height:100%;border-radius:inherit;background:var(--green);transition:width .25s ease}
+    .status{color:var(--muted);font-size:.88rem;font-weight:700}
+    .topic{margin:0 0 8px;color:var(--green);font-size:.82rem;font-weight:800}
+    h2{margin:0 0 20px;font-size:clamp(1.25rem,3vw,1.65rem);line-height:1.3}
+    .answers{display:grid;gap:10px}
+    .answer{width:100%;padding:13px 15px;border:1px solid var(--line);border-radius:14px;background:#fff;text-align:left;color:var(--ink);cursor:pointer;transition:background .15s,border .15s,transform .15s}
+    .answer:hover:not(:disabled){transform:translateY(-1px);border-color:#9bbfb3;background:#f5faf7}
+    .answer:disabled{cursor:default}
+    .answer.correct{border-color:#6eaa62;background:#eff8e9}
+    .answer.incorrect{border-color:#d29570;background:#fff2e9}
+    .feedback{min-height:50px;margin:17px 0 0;color:var(--muted)}
+    .actions{display:flex;justify-content:flex-end;margin-top:16px}
+    .next{border:0;border-radius:999px;background:var(--green);padding:12px 19px;color:#fff;font-weight:800;cursor:pointer}
+    .next:hover{background:#0d554b}
+    .next:disabled{opacity:.45;cursor:not-allowed}
+    .done{text-align:center;padding:18px 0}
+    .done h2{font-size:2rem}
+    .score{display:inline-grid;place-items:center;width:108px;height:108px;margin:6px 0 16px;border:7px solid var(--lime);border-radius:50%;font-size:1.4rem;font-weight:850}
+    .footnote{margin:16px 0 0;color:var(--muted);font-size:.85rem}
+    html[data-theme="dark"]{color-scheme:dark;--ink:#e7efec;--muted:#a9bbb6;--paper:#121a1b;--card:#1c2829;--line:#344344;--green:#84c7ad;--lime:#c8ed83}
+    html[data-theme="dark"] header{background:#121a1bed}
+    html[data-theme="dark"] .progress{background:#344344}
+    html[data-theme="dark"] .answer{background:#202d2e;color:var(--ink)}
+    html[data-theme="dark"] .answer:hover:not(:disabled){background:#253a32}
+    html[data-theme="dark"] .answer.correct{border-color:#6eaa62;background:#263a2a}
+    html[data-theme="dark"] .answer.incorrect{border-color:#d29570;background:#3a2a24}
+    [hidden]{display:none!important}
+    @media(prefers-reduced-motion:reduce){*,*:before,*:after{transition:none!important}}
+  </style>
+</head>
+<body>
+  <header><div class="wrap bar"><a href="index.html">← <span data-ru>Neuroctivity</span><span data-en hidden>Neuroctivity</span></a><div style="display:flex;gap:8px"><button class="lang" id="lang" type="button">RU / EN</button><button class="theme-toggle" id="theme-toggle" type="button" aria-label="Switch to dark theme" title="Switch to dark theme">☾</button></div></div></header>
+  <main class="wrap">
+    <p class="eyebrow"><span data-ru>Учебная лаборатория</span><span data-en hidden>Study lab</span></p>
+    <h1><span data-ru>Проверь, как работает мозг</span><span data-en hidden>Test your brain knowledge</span></h1>
+    <p class="intro"><span data-ru>Восемь коротких вопросов по нейронам, мозговым системам, памяти и научным методам. Ответы не сохраняются.</span><span data-en hidden>Eight quick questions on neurons, brain systems, memory, and research methods. Answers are not saved.</span></p>
+    <section class="quiz" aria-label="Neuroscience quiz">
+      <div id="question-view">
+        <div class="quiz-head"><div class="progress" role="progressbar" aria-label="Прогресс" aria-valuemin="0" aria-valuemax="8" aria-valuenow="0"><span id="progress"></span></div><span class="status" id="status"></span></div>
+        <p class="topic" id="topic"></p>
+        <h2 id="question"></h2>
+        <div class="answers" id="answers"></div>
+        <p class="feedback" id="feedback" aria-live="polite"></p>
+        <div class="actions"><button id="next" class="next" type="button" disabled><span data-ru>Дальше</span><span data-en hidden>Next</span> →</button></div>
+      </div>
+      <div id="result-view" class="done" hidden>
+        <div class="score" id="score"></div>
+        <h2><span data-ru>Раунд завершён!</span><span data-en hidden>Round complete!</span></h2>
+        <p id="result-copy"></p>
+        <button id="restart" class="restart" type="button"><span data-ru>Пройти ещё раз</span><span data-en hidden>Try again</span></button>
+      </div>
+    </section>
+    <p class="footnote"><span data-ru>Тренажёр — для повторения учебных понятий. Он не оценивает способности и не сохраняет ответы или личные данные.</span><span data-en hidden>This quiz is for reviewing course concepts. It does not assess ability or save answers or personal data.</span></p>
+  </main>
+  <script>
+    const bank = [
+      {topic:['Нейроны','Neurons'],q:['Какая часть нейрона обычно принимает входящие сигналы?','Which part of a neuron usually receives incoming signals?'],a:[['Дендриты','Dendrites'],['Миелиновая оболочка','Myelin sheath'],['Аксонные окончания','Axon terminals']],correct:0,e:['Дендриты принимают множество сигналов от других клеток.','Dendrites receive many signals from other cells.']},
+      {topic:['Электрический сигнал','Electrical signals'],q:['Что происходит во время потенциала действия?','What happens during an action potential?'],a:[['Краткое изменение напряжения мембраны нейрона','A brief change in a neuron’s membrane voltage'],['Образуется новая клетка','A new cell is formed'],['Синапс навсегда закрывается','A synapse permanently closes']],correct:0,e:['Потенциал действия — быстро распространяющийся электрический импульс, связанный с движением ионов через мембрану.','An action potential is a rapidly travelling electrical impulse associated with ions moving across the membrane.']},
+      {topic:['Синапсы','Synapses'],q:['Как чаще всего передаётся сигнал через химический синапс?','How is a signal most often transmitted across a chemical synapse?'],a:[['Молекулы выделяются в синаптическую щель','Molecules are released into the synaptic cleft'],['Клетки сливаются в одну','The cells fuse into one'],['Сигнал проходит только по костям','The signal travels only through bone']],correct:0,e:['Передатчики выделяются из окончания нейрона и связываются с рецепторами следующей клетки.','Transmitters are released from a neuron terminal and bind to receptors on the next cell.']},
+      {topic:['Мозговые системы','Brain systems'],q:['Какое утверждение о функциях мозга наиболее точно?','Which statement about brain function is most accurate?'],a:[['Многие функции возникают из взаимодействия нескольких областей','Many functions emerge from interactions among multiple regions'],['Каждая сложная функция принадлежит только одной точке','Each complex function belongs to one single spot'],['Полушария работают полностью независимо','The hemispheres work entirely independently']],correct:0,e:['Области специализируются, но сложные функции обычно поддерживаются распределёнными сетями.','Regions specialize, but complex functions are usually supported by distributed networks.']},
+      {topic:['Память','Memory'],q:['Какова одна из важных ролей гиппокампа в памяти?','What is one important role of the hippocampus in memory?'],a:[['Помогает формировать новые эпизодические воспоминания','It helps form new episodic memories'],['Создаёт зрительный сигнал в сетчатке','It creates visual signals in the retina'],['Управляет сокращением каждой мышцы напрямую','It directly controls every muscle contraction']],correct:0,e:['Гиппокамп участвует в связывании элементов нового опыта; долговременная память распределена по мозговым сетям.','The hippocampus helps bind elements of new experiences; long-term memory is distributed across brain networks.']},
+      {topic:['Нейропластичность','Neuroplasticity'],q:['Что означает синаптическая пластичность?','What does synaptic plasticity mean?'],a:[['Связи между нейронами могут менять эффективность','Connections between neurons can change their effectiveness'],['Все нейроны одинаково активны постоянно','All neurons are constantly equally active'],['Мозг перестаёт обмениваться сигналами','The brain stops communicating']],correct:0,e:['Изменение силы синаптических связей — один из клеточных механизмов обучения и памяти.','Changing synaptic strength is one cellular mechanism involved in learning and memory.']},
+      {topic:['Научные методы','Research methods'],q:['Что обычно измеряет функциональная МРТ (fMRI)?','What does functional MRI (fMRI) usually measure?'],a:[['Косвенные изменения, связанные с кровотоком и насыщением крови кислородом','Indirect changes related to blood flow and blood oxygenation'],['Электрические импульсы каждого отдельного нейрона напрямую','Electrical impulses from every individual neuron directly'],['Мысли человека без измерений','A person’s thoughts without measurement']],correct:0,e:['fMRI оценивает гемодинамический сигнал; это не прямое чтение нейронных импульсов или мыслей.','fMRI estimates a haemodynamic signal; it is not a direct reading of neural impulses or thoughts.']},
+      {topic:['Сон и биоритмы','Sleep and biological rhythms'],q:['Как лучше всего описать циркадный ритм?','What is the best description of a circadian rhythm?'],a:[['Внутренний цикл примерно суточной продолжительности','An internal cycle of about a day'],['Секундный рефлекс колена','A one-second knee reflex'],['Изменение только во время еды','A change that happens only during eating']],correct:0,e:['Циркадные ритмы помогают согласовывать процессы организма с циклом дня и ночи.','Circadian rhythms help coordinate body processes with the day–night cycle.']}
+    ];
+    let lang='ru', round=[], index=0, points=0, optionOrders=[], selectedAnswers=[];
+    const el=id=>document.getElementById(id);
+    const themeButton=el('theme-toggle');
+    function setTheme(theme){
+      const current=theme==='dark'?'dark':'light';
+      document.documentElement.dataset.theme=current;
+      themeButton.textContent=current==='dark'?'☀':'☾';
+      themeButton.setAttribute('aria-label',current==='dark'?'Switch to light theme':'Switch to dark theme');
+      themeButton.title=current==='dark'?'Switch to light theme':'Switch to dark theme';
+    }
+    setTheme(document.documentElement.dataset.theme);
+    themeButton.addEventListener('click',()=>{
+      const next=document.documentElement.dataset.theme==='dark'?'light':'dark';
+      setTheme(next);
+      try{localStorage.setItem('neuroctivity-theme',next);}catch(error){console.warn('Could not save the selected theme.',error);}
+    });
+    window.addEventListener('storage',event=>{
+      if(event.key==='neuroctivity-theme'&&event.newValue)setTheme(event.newValue);
+    });
+    function shuffle(values){
+      const result=[...values];
+      for(let i=result.length-1;i>0;i--){
+        const j=Math.floor(Math.random()*(i+1));
+        [result[i],result[j]]=[result[j],result[i]];
+      }
+      return result;
+    }
+    function setLanguage(next){
+      lang=next; document.documentElement.lang=lang;
+      document.querySelectorAll('[data-ru]').forEach(n=>n.hidden=lang!=='ru');
+      document.querySelectorAll('[data-en]').forEach(n=>n.hidden=lang!=='en');
+      document.querySelector('.progress').setAttribute('aria-label',lang==='ru'?'Прогресс':'Progress');
+      render();
+    }
+    function render(){
+      if(index>=round.length){showResult();return;}
+      const item=round[index],i=lang==='ru'?0:1;
+      el('topic').textContent=item.topic[i];
+      el('question').textContent=item.q[i];
+      el('status').textContent=lang==='ru'?`Вопрос ${index+1} из ${round.length}`:`Question ${index+1} of ${round.length}`;
+      const selected=selectedAnswers[index];
+      const percent=Math.round((index+(selected===null?0:1))/round.length*100);
+      el('progress').style.width=`${percent}%`;
+      el('question-view').querySelector('.progress').setAttribute('aria-valuenow',String(index+(selected===null?0:1)));
+      el('feedback').textContent='';
+      el('next').disabled=selected===null;
+      const host=el('answers');host.replaceChildren();
+      const correctPosition=optionOrders[index].indexOf(item.correct);
+      optionOrders[index].forEach((answerIndex,position)=>{
+        const button=document.createElement('button');
+        button.type='button';button.className='answer';button.textContent=item.a[answerIndex][i];
+        button.disabled=selected!==null;
+        if(selected!==null&&position===correctPosition)button.classList.add('correct');
+        else if(selected===position)button.classList.add('incorrect');
+        button.addEventListener('click',()=>choose(position));
+        host.append(button);
+      });
+      if(selected!==null){
+        const correct=selected===correctPosition;
+        el('feedback').textContent=(correct?(lang==='ru'?'Верно. ':'Correct. '):(lang==='ru'?'Пока нет. ':'Not quite. '))+item.e[i];
+      }
+    }
+    function choose(choice){
+      if(selectedAnswers[index]!==null)return;
+      const item=round[index],buttons=[...el('answers').children];
+      selectedAnswers[index]=choice;
+      const correctPosition=optionOrders[index].indexOf(item.correct),correct=choice===correctPosition;
+      if(correct)points++;
+      buttons.forEach((button,n)=>{button.disabled=true;if(n===correctPosition)button.classList.add('correct');else if(n===choice)button.classList.add('incorrect');});
+      el('feedback').textContent=(correct?(lang==='ru'?'Верно. ':'Correct. '):(lang==='ru'?'Пока нет. ':'Not quite. '))+item.e[lang==='ru'?0:1];
+      el('next').disabled=false;
+      el('question-view').querySelector('.progress').setAttribute('aria-valuenow',String(index+1));
+      el('progress').style.width=`${Math.round((index+1)/round.length*100)}%`;
+    }
+    function showResult(){
+      el('question-view').hidden=true;el('result-view').hidden=false;
+      el('score').textContent=`${points}/${round.length}`;
+      el('result-copy').textContent=lang==='ru'?`Правильных ответов: ${points} из ${round.length}. Вернись к темам, которые хочется повторить.`:`Correct answers: ${points} out of ${round.length}. Revisit any topics you would like to review.`;
+    }
+    function start(){
+      round=shuffle(bank);optionOrders=round.map(item=>shuffle(item.a.map((_,n)=>n)));selectedAnswers=round.map(()=>null);index=0;points=0;
+      el('question-view').hidden=false;el('result-view').hidden=true;render();
+    }
+    el('lang').addEventListener('click',()=>setLanguage(lang==='ru'?'en':'ru'));
+    el('next').addEventListener('click',()=>{if(selectedAnswers[index]===null)return;index++;render();});
+    el('restart').addEventListener('click',start);
+    start();
+  </script>
+</body>
+</html>

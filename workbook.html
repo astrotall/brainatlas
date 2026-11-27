@@ -1,0 +1,398 @@
+<!doctype html>
+<html lang="ru">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="theme-color" content="#eef4f1">
+  <meta name="description" content="Двуязычная тетрадь по нейробиологии: поиск тем, объяснения, тесты с разбором и заметки для подготовки к ЕГЭ, GCSE/IGCSE, IB и AP.">
+  <title>Тетрадь по нейробиологии — Neuroctivity</title>
+  <script>
+    try{document.documentElement.dataset.theme=localStorage.getItem('neuroctivity-theme')||'light';}catch(error){document.documentElement.dataset.theme='light';}
+  </script>
+  <style>
+    :root{color-scheme:light;--ink:#172a2c;--muted:#54696b;--paper:#f6f8f6;--surface:#fff;--line:#dce7e3;--green:#14685d;--lime:#c8ed83;--blue:#dcecff;--peach:#ffe4d5;--shadow:0 16px 46px #193b3512}
+    *{box-sizing:border-box}
+    html{scroll-behavior:smooth}
+    body{margin:0;background:var(--paper);color:var(--ink);font:16px/1.65 system-ui,-apple-system,BlinkMacSystemFont,"Segoe UI",sans-serif}
+    a{color:inherit}
+    a:focus-visible,button:focus-visible,input:focus-visible,select:focus-visible,textarea:focus-visible{outline:3px solid #e29b5d;outline-offset:3px}
+    .wrap{width:min(1120px,calc(100% - 40px));margin:auto}
+    .topbar{position:sticky;top:0;z-index:5;background:#f6f8f6ed;border-bottom:1px solid var(--line);backdrop-filter:blur(14px)}
+    .nav{height:68px;display:flex;align-items:center;gap:18px}
+    .brand{display:flex;align-items:center;gap:10px;margin-right:auto;text-decoration:none;font-weight:850;letter-spacing:-.04em;font-size:1.1rem}
+    .brand-mark{display:grid;place-items:center;width:34px;height:34px;border-radius:12px;background:var(--green);color:white;font-size:19px}
+    .brand-text{display:flex;flex-direction:column;line-height:1.05}
+    .brand-tag{margin-top:3px;color:var(--green);font-size:.6rem;font-weight:750;letter-spacing:.12em;white-space:nowrap}
+    .navlink{color:var(--muted);font-size:.9rem;font-weight:700;text-decoration:none}
+    .navlink:hover{color:var(--green)}
+    .lang,button,.button{font:inherit}
+    .lang{border:1px solid var(--line);background:var(--surface);border-radius:999px;padding:8px 12px;font-size:.8rem;font-weight:750;cursor:pointer}
+    .theme-toggle{width:38px;height:38px;border:1px solid var(--line);border-radius:50%;background:var(--surface);color:var(--ink);font:inherit;font-size:1.05rem;font-weight:750;cursor:pointer}
+    .hero{padding:56px 0 42px;background:radial-gradient(ellipse at 86% 20%,#c9e8dd 0,transparent 36%),linear-gradient(130deg,#edf5f2,#f8f8f1 70%)}
+    .eyebrow{margin:0 0 12px;color:var(--green);font-size:.76rem;font-weight:850;letter-spacing:.13em;text-transform:uppercase}
+    h1,h2,h3,p{margin-top:0}
+    h1{max-width:780px;margin-bottom:12px;font-size:clamp(2.5rem,6vw,4.2rem);line-height:1;letter-spacing:-.06em}
+    .hero p{max-width:760px;margin-bottom:0;color:var(--muted);font-size:1.08rem}
+    main{padding:34px 0 72px}
+    .tools{display:grid;grid-template-columns:minmax(0,1fr) 230px;gap:12px;margin-bottom:14px}
+    input,select,textarea{width:100%;border:1px solid var(--line);border-radius:14px;background:white;color:var(--ink);font:inherit}
+    input,select{min-height:50px;padding:10px 14px}
+    textarea{min-height:170px;padding:14px;resize:vertical;line-height:1.55}
+    .search-label{position:absolute;width:1px;height:1px;padding:0;margin:-1px;overflow:hidden;clip:rect(0,0,0,0);white-space:nowrap;border:0}
+    .hint,.muted{color:var(--muted);font-size:.88rem}
+    .hint{margin:8px 0 22px}
+    .layout{display:grid;grid-template-columns:310px minmax(0,1fr);gap:20px;align-items:start}
+    .panel,.topic-card{border:1px solid var(--line);border-radius:20px;background:var(--surface);box-shadow:0 8px 24px #193b3508}
+    .topic-list{position:sticky;top:86px;padding:16px}
+    .list-head{display:flex;justify-content:space-between;align-items:center;gap:12px;margin:0 0 12px}
+    .list-head h2{margin:0;font-size:1rem}
+    .count{color:var(--muted);font-size:.82rem}
+    .cards{display:grid;gap:8px;max-height:min(67vh,680px);overflow:auto;padding-right:2px}
+    .topic-button{width:100%;padding:11px 12px;border:1px solid transparent;border-radius:13px;background:#f7f9f7;color:var(--ink);text-align:left;cursor:pointer}
+    .topic-button:hover,.topic-button[aria-current="true"]{border-color:#b9d8c8;background:#edf6f1}
+    .topic-button strong{display:block;font-size:.91rem;line-height:1.35}
+    .topic-button span{display:block;margin-top:3px;color:var(--muted);font-size:.77rem}
+    .lesson{padding:clamp(18px,4vw,34px)}
+    .lesson-top{display:flex;align-items:center;justify-content:space-between;gap:16px;margin-bottom:12px}
+    .tag{display:inline-flex;padding:5px 10px;border-radius:999px;background:#eaf3ec;color:var(--green);font-size:.76rem;font-weight:800}
+    .best{color:var(--muted);font-size:.82rem;text-align:right}
+    .lesson h2{margin-bottom:10px;font-size:clamp(1.7rem,4vw,2.4rem);line-height:1.12;letter-spacing:-.04em}
+    .lesson-intro{color:var(--muted);font-size:1.02rem}
+    .lesson h3{margin:24px 0 8px;font-size:1.08rem}
+    .lesson-copy{color:#31484a}
+    .key-points{display:grid;gap:8px;margin:0;padding:0;list-style:none}
+    .key-points li{position:relative;padding:11px 14px 11px 37px;border-radius:12px;background:#f3f7f4}
+    .key-points li:before{position:absolute;left:14px;color:var(--green);content:"✓";font-weight:900}
+    .exam-box,.note-box,.quiz-box{margin-top:22px;padding:18px;border-radius:16px}
+    .exam-box{background:#edf3ff}
+    .exam-box p,.note-box p{margin:5px 0 0;color:var(--muted);font-size:.9rem}
+    .quiz-box{border:1px solid var(--line);background:#fbfcfb}
+    .quiz-head{display:flex;align-items:center;justify-content:space-between;gap:12px}
+    .quiz-head h3{margin:0}
+    .quiz-questions{display:grid;gap:13px;margin:16px 0}
+    fieldset.question{min-width:0;margin:0;padding:14px;border:1px solid var(--line);border-radius:13px;background:white}
+    .question legend{padding:0 5px;font-weight:750}
+    .answers{display:grid;gap:7px;margin-top:7px}
+    .answer{display:flex;align-items:flex-start;gap:9px;padding:7px 8px;border-radius:9px;cursor:pointer}
+    .answer:hover{background:#f4f8f5}
+    .answer input{flex:0 0 auto;width:17px;min-height:17px;margin:4px 0 0;accent-color:var(--green)}
+    .feedback{margin:8px 0 0;color:var(--muted);font-size:.87rem}
+    .feedback.correct{color:#14685d}.feedback.incorrect{color:#9a4827}
+    .button{display:inline-flex;justify-content:center;align-items:center;gap:8px;min-height:42px;padding:9px 15px;border:1px solid var(--green);border-radius:999px;background:var(--green);color:white;font-weight:750;text-decoration:none;cursor:pointer}
+    .button:hover{background:#0d554b}
+    .button.secondary{border-color:var(--line);background:white;color:var(--green)}
+    .button.small{min-height:36px;padding:6px 12px;font-size:.86rem}
+    .quiz-actions,.note-actions{display:flex;flex-wrap:wrap;align-items:center;gap:9px}
+    .quiz-result{margin:12px 0 0;padding:12px 14px;border-radius:12px;background:#eaf3ec;font-weight:750}
+    .note-box{border:1px solid var(--line);background:#fffaf0}
+    .note-head{display:flex;justify-content:space-between;align-items:center;gap:12px}
+    .note-head h3{margin:0}
+    .note-box label{display:block;margin:12px 0 7px;font-size:.9rem;font-weight:700}
+    .note-status{min-height:1.5em;margin:8px 0 0;color:var(--muted);font-size:.82rem}
+    .empty{padding:24px;border:1px dashed #b5c9c1;border-radius:16px;color:var(--muted);text-align:center}
+    .footer{padding:26px 0 38px;border-top:1px solid var(--line);color:var(--muted);font-size:.88rem}
+    .footer-row{display:flex;justify-content:space-between;gap:16px}
+    [data-en][hidden],[data-ru][hidden]{display:none}
+    html[data-theme="dark"]{color-scheme:dark;--ink:#e7efec;--muted:#a9bbb6;--paper:#121a1b;--surface:#1c2829;--line:#344344;--green:#84c7ad;--lime:#c8ed83;--blue:#263548;--peach:#49352d;--shadow:0 16px 46px #0005}
+    html[data-theme="dark"] .topbar{background:#121a1bed}
+    html[data-theme="dark"] .hero{background:radial-gradient(ellipse at 86% 20%,#28453e 0,transparent 36%),linear-gradient(130deg,#172523,#1b2020 70%)}
+    html[data-theme="dark"] .topic-button{background:#202d2e;color:var(--ink)}
+    html[data-theme="dark"] .topic-button:hover,html[data-theme="dark"] .topic-button[aria-current="true"]{border-color:#527a68;background:#253a32}
+    html[data-theme="dark"] .lesson-copy{color:#d0ded9}
+    html[data-theme="dark"] .key-points li{background:#253232}
+    html[data-theme="dark"] .exam-box{background:#222f41}
+    html[data-theme="dark"] .quiz-box{background:#172122}
+    html[data-theme="dark"] fieldset.question{background:#1c2829}
+    html[data-theme="dark"] .answer:hover{background:#253232}
+    html[data-theme="dark"] .quiz-result{background:#253b31}
+    html[data-theme="dark"] .note-box{background:#302b20}
+    html[data-theme="dark"] .empty{border-color:#526561}
+    @media(max-width:850px){.layout{grid-template-columns:1fr}.topic-list{position:static}.cards{grid-template-columns:repeat(2,minmax(0,1fr));max-height:none}.tools{grid-template-columns:1fr 200px}}
+    @media(max-width:580px){.wrap{width:min(100% - 28px,1120px)}.nav{height:60px}.navlink{font-size:.82rem}.hero{padding:42px 0 34px}.tools{grid-template-columns:1fr}.cards{grid-template-columns:1fr;max-height:300px}.lesson{padding:18px}.lesson-top,.note-head{align-items:flex-start;flex-direction:column}.footer-row{flex-direction:column}}
+    @media(prefers-reduced-motion:reduce){html{scroll-behavior:auto}*,*:before,*:after{transition:none!important}}
+  </style>
+</head>
+<body>
+  <header class="topbar">
+    <div class="wrap nav">
+      <a class="brand" href="index.html"><span class="brand-mark" aria-hidden="true">n</span><span class="brand-text">Neuroctivity<small class="brand-tag">we are CONNECTED.</small></span></a>
+      <a class="navlink" href="mozg-3d-atlas-2.html"><span data-ru>3D-атлас</span><span data-en hidden>3D atlas</span></a>
+      <a class="navlink" href="index.html#resources"><span data-ru>Ресурсы</span><span data-en hidden>Resources</span></a>
+      <button class="lang" id="lang-toggle" type="button" aria-label="Switch language">RU / EN</button>
+      <button class="theme-toggle" id="theme-toggle" type="button" aria-label="Switch to dark theme" title="Switch to dark theme">☾</button>
+    </div>
+  </header>
+  <section class="hero">
+    <div class="wrap">
+      <p class="eyebrow"><span data-ru>Личная тетрадь и тренажёр</span><span data-en hidden>Study workbook and practice</span></p>
+      <h1><span data-ru>Изучай. Записывай. Проверяй себя.</span><span data-en hidden>Learn. Take notes. Test yourself.</span></h1>
+      <p><span data-ru>Ищи темы по мозгу и нейробиологии, разбирай ключевые идеи, проходи тематические тесты с объяснениями и веди собственные заметки.</span><span data-en hidden>Search brain and neuroscience topics, review key ideas, take topic-based quizzes with explanations, and keep your own notes.</span></p>
+    </div>
+  </section>
+  <main class="wrap">
+    <div class="tools">
+      <label class="search-label" for="topic-search"><span data-ru>Поиск по темам</span><span data-en hidden>Search topics</span></label>
+      <input id="topic-search" type="search" autocomplete="off" placeholder="Например: нейрон, память, зрение…" aria-label="Поиск по темам">
+      <label class="search-label" for="topic-filter"><span data-ru>Фильтр по разделу</span><span data-en hidden>Filter by category</span></label>
+      <select id="topic-filter" aria-label="Фильтр по разделу"></select>
+    </div>
+    <p class="hint"><span data-ru>Поиск работает по названиям и содержанию на русском и английском. Прогресс и заметки хранятся только в этом браузере на этом устройстве.</span><span data-en hidden>Search checks titles and content in both Russian and English. Notes and progress are stored only in this browser on this device.</span></p>
+    <div class="layout">
+      <aside class="panel topic-list" aria-label="Учебные темы">
+        <div class="list-head"><h2><span data-ru>Темы курса</span><span data-en hidden>Course topics</span></h2><span class="count" id="topic-count" aria-live="polite"></span></div>
+        <div class="cards" id="topic-list"></div>
+      </aside>
+      <article class="panel lesson" id="lesson" aria-live="polite">
+        <div class="empty"><span data-ru>Выберите тему из списка, чтобы начать.</span><span data-en hidden>Select a topic to get started.</span></div>
+      </article>
+    </div>
+  </main>
+  <footer class="footer"><div class="wrap footer-row"><span>Neuroctivity · <span data-ru>Нейробиология через биологию и научные данные</span><span data-en hidden>Neuroscience through biology and evidence</span></span><a href="index.html"><span data-ru>На главную ↑</span><span data-en hidden>Home ↑</span></a></div></footer>
+  <script>
+    const categories = [
+      {id:'cells', ru:'Клетки и сигналы', en:'Cells and signals'},
+      {id:'systems', ru:'Мозг и системы', en:'Brain and systems'},
+      {id:'functions', ru:'Функции мозга', en:'Brain functions'},
+      {id:'biology', ru:'Биология и исследования', en:'Biology and research'}
+    ];
+    const topics = [
+      {id:'neuron',category:'cells',title:['Нейрон: строение и функция','The neuron: structure and function'],keywords:'нервная клетка дендрит аксон soma cell dendrite axon myelin',intro:['Нейроны — специализированные клетки, которые принимают, интегрируют и передают информацию. Их форма связана с задачами и связями клетки.','Neurons are specialised cells that receive, integrate, and transmit information. Their shapes reflect their roles and connections.'],body:['Дендриты и тело клетки принимают и суммируют входящие сигналы. Аксон проводит электрический сигнал к окончаниям, которые могут передать его другой клетке. Миелин образует изолирующую оболочку вокруг некоторых аксонов; промежутки между миелиновыми сегментами называются узлами Ранвье. Нейрон работает в составе сети и зависит от поддерживающих клеток, в том числе глии.','Dendrites and the cell body receive and integrate incoming signals. The axon carries an electrical signal towards terminals that can pass information to another cell. Myelin insulates some axons; gaps between myelin segments are nodes of Ranvier. Neurons work in networks and depend on supporting cells, including glia.'],keys:[['Дендриты принимают входящие сигналы; аксон проводит сигнал от тела клетки.','Dendrites receive input; the axon carries signals away from the cell body.'],['Миелин изолирует аксон и помогает быстрее проводить сигнал.','Myelin insulates an axon and helps conduct signals faster.'],['Нейрон — часть сети; функцию нельзя понять только по названию одной области.','A neuron is part of a network; a single region name does not explain function.']],exam:['Связь строения клетки с функцией; роль миелина и нейроглии.','Relating cell structure to function; roles of myelin and glia.'],questions:[{q:['Какая часть нейрона обычно принимает множество входящих сигналов?','Which part of a neuron typically receives many incoming signals?'],a:[['Дендриты','Dendrites'],['Узлы Ранвье','Nodes of Ranvier'],['Миелиновая оболочка','Myelin sheath']],c:0,e:['Дендриты и тело клетки принимают и интегрируют сигналы.','Dendrites and the cell body receive and integrate signals.']},{q:['Какова основная роль миелина на аксоне?','What is a main role of myelin on an axon?'],a:[['Изолировать аксон и ускорять проведение','Insulate the axon and speed conduction'],['Создавать гормоны','Produce hormones'],['Принимать свет','Detect light']],c:0,e:['Миелин действует как изолятор; узлы Ранвье участвуют в скачкообразном проведении.','Myelin acts as insulation; nodes of Ranvier support saltatory conduction.']},{q:['В каком направлении обычно проходит сигнал по аксону?','In which direction does a signal usually travel along an axon?'],a:[['От тела клетки к окончаниям аксона','From the cell body towards axon terminals'],['От окончаний к ядру только','Only from terminals to the nucleus'],['Из крови в дендриты напрямую','Directly from blood into dendrites']],c:0,e:['Аксон проводит потенциалы действия от области тела клетки к окончаниям.','The axon conducts action potentials from the cell body region towards its terminals.']}]},
+      {id:'action-potential',category:'cells',title:['Потенциал действия','The action potential'],keywords:'мембрана натрий калий ион деполяризация реполяризация импульс membrane sodium potassium ion depolarisation repolarisation',intro:['Потенциал действия — кратковременное изменение напряжения на мембране возбудимой клетки, которое распространяется по аксону.','An action potential is a brief change in voltage across an excitable cell membrane that propagates along an axon.'],body:['В покое между внутренней и внешней сторонами мембраны существует разность потенциалов. При достижении порога открываются потенциал-зависимые натриевые каналы: вход Na⁺ вызывает деполяризацию. Затем натриевые каналы инактивируются, а выход K⁺ способствует реполяризации. Потенциал действия подчиняется принципу «всё или ничего»; сила стимула часто кодируется частотой импульсов, а не их высотой.','At rest, a voltage difference exists across the membrane. When threshold is reached, voltage-gated sodium channels open: Na⁺ entry causes depolarisation. Sodium channels then inactivate, while K⁺ leaving the cell helps repolarise it. An action potential is all-or-none; stimulus intensity is often encoded by firing frequency rather than action-potential size.'],keys:[['Порог запускает стереотипный потенциал действия.','Reaching threshold triggers a stereotyped action potential.'],['Na⁺ входит при деполяризации; выход K⁺ помогает реполяризации.','Na⁺ enters during depolarisation; K⁺ leaving helps repolarisation.'],['Более сильный стимул часто повышает частоту импульсов.','A stronger stimulus often increases firing frequency.']],exam:['Ионные градиенты, мембранный потенциал и последовательность фаз импульса.','Ion gradients, membrane potential, and the sequence of an impulse.'],questions:[{q:['Какой ионный поток обычно начинает быструю деполяризацию?','Which ion movement usually starts rapid depolarisation?'],a:[['Вход Na⁺ в клетку','Na⁺ entering the cell'],['Выход глюкозы','Glucose leaving'],['Вход белков через ядро','Proteins entering through the nucleus']],c:0,e:['Открытие потенциал-зависимых натриевых каналов позволяет Na⁺ войти в клетку.','Opening voltage-gated sodium channels allows Na⁺ to enter the cell.']},{q:['Что лучше всего описывает принцип «всё или ничего»?','What best describes the all-or-none principle?'],a:[['После порога потенциал действия имеет примерно стереотипную амплитуду','After threshold, an action potential has a stereotyped amplitude'],['Сила импульса всегда прямо меняет его высоту','Impulse strength always directly changes its height'],['Любой стимул запускает одинаковый ответ','Every stimulus triggers the same response']],c:0,e:['Порог запускает полный потенциал действия; интенсивность часто кодируется частотой.','Threshold triggers a full action potential; intensity is often encoded by frequency.']},{q:['Какой процесс вносит вклад в реполяризацию?','Which process contributes to repolarisation?'],a:[['Выход K⁺ из клетки','K⁺ leaving the cell'],['Продолжительный вход Na⁺ без ограничений','Unrestricted continued Na⁺ entry'],['Распад миелина','Myelin breakdown']],c:0,e:['Открытие калиевых каналов и выход K⁺ способствуют возвращению потенциала мембраны.','Potassium-channel opening and K⁺ efflux help restore membrane voltage.']}]},
+      {id:'synapse',category:'cells',title:['Синапсы и нейромедиаторы','Synapses and neurotransmitters'],keywords:'химический электрический медиатор рецептор везикула синаптическая щель neurotransmitter receptor vesicle cleft',intro:['Синапс — специализированное место передачи сигнала между нейронами или нейроном и другой клеткой. Он может быть химическим или электрическим.','A synapse is a specialised junction that transmits signals between neurons or between a neuron and another cell. It can be chemical or electrical.'],body:['В химическом синапсе потенциал действия достигает окончания аксона и запускает выделение нейромедиатора из везикул. Медиатор проходит через синаптическую щель и связывается с рецепторами постсинаптической клетки. Ответ зависит от типа рецептора и клетки: он может повышать или снижать вероятность её активности. Медиаторы удаляются из щели, например обратным захватом или ферментативным расщеплением.','At a chemical synapse, an action potential reaches the axon terminal and triggers neurotransmitter release from vesicles. The transmitter crosses the synaptic cleft and binds receptors on the postsynaptic cell. The effect depends on receptor and cell type: it can increase or decrease the likelihood of activity. Transmitters are cleared, for example by reuptake or enzymatic breakdown.'],keys:[['Сигнал в химическом синапсе передаётся с участием медиатора и рецептора.','Chemical synaptic transmission involves a transmitter and a receptor.'],['Эффект зависит от рецептора; один медиатор не означает один универсальный эффект.','The effect depends on the receptor; one transmitter does not imply one universal effect.'],['Окончание сигнала включает удаление медиатора из синаптической щели.','Ending the signal involves clearing transmitter from the synaptic cleft.']],exam:['Передача сигналов между клетками, мембранные рецепторы и связь между строением и функцией.','Cell signalling, membrane receptors, and structure–function relationships.'],questions:[{q:['Что связывает нейромедиатор в постсинаптической мембране?','What does a neurotransmitter bind on the postsynaptic membrane?'],a:[['Специфический рецептор','A specific receptor'],['ДНК в ядре напрямую','DNA in the nucleus directly'],['Миелин','Myelin']],c:0,e:['Рецептор распознаёт медиатор и запускает клеточный ответ.','A receptor recognises the transmitter and initiates a cellular response.']},{q:['Как нейромедиатор обычно попадает в синаптическую щель?','How does a neurotransmitter typically enter the synaptic cleft?'],a:[['Выделяется из везикул в окончании нейрона','It is released from vesicles in a neuron terminal'],['Переносится эритроцитами','It is carried by red blood cells'],['Синтезируется внутри постсинаптической ДНК','It is made inside postsynaptic DNA']],c:0,e:['Вход Ca²⁺ в окончание способствует слиянию везикул с мембраной и выделению медиатора.','Ca²⁺ entry into the terminal helps vesicles fuse with the membrane and release transmitter.']},{q:['Почему один и тот же медиатор может вызывать разные ответы?','Why can the same transmitter cause different responses?'],a:[['Разные рецепторы и клеточные механизмы','Different receptors and cellular mechanisms'],['Потому что рецепторы не участвуют','Because receptors are not involved'],['Из-за одинаковой реакции всех клеток','Because all cells respond identically']],c:0,e:['Постсинаптический эффект определяется подтипом рецептора и внутриклеточными путями.','The postsynaptic effect depends on receptor subtype and intracellular pathways.']}]},
+      {id:'brain-structure',category:'systems',title:['Отделы мозга и нервная система','Brain regions and the nervous system'],keywords:'кора мозжечок ствол спинной мозг центральная периферическая лобная доля мозжечок cortex cerebellum brainstem spinal cord CNS',intro:['Мозг работает как взаимосвязанная система. Анатомические области вносят вклад в функции, но сложные действия обычно поддерживаются распределёнными сетями.','The brain works as an interconnected system. Anatomical regions contribute to functions, but complex actions are usually supported by distributed networks.'],body:['Центральная нервная система включает головной и спинной мозг; периферическая нервная система соединяет её с рецепторами, мышцами и органами. Кора участвует в восприятии, планировании и многих когнитивных процессах. Мозжечок важен для координации и корректировки движений, а ствол мозга содержит пути и сети, поддерживающие базовые функции организма. Функции не следует сводить к жёсткой схеме «одна область — одно поведение».','The central nervous system includes the brain and spinal cord; the peripheral nervous system connects it to receptors, muscles, and organs. The cortex contributes to perception, planning, and many cognitive processes. The cerebellum is important for coordinating and adjusting movement, while the brainstem contains pathways and networks supporting basic body functions. Functions should not be reduced to a rigid “one region — one behaviour” map.'],keys:[['ЦНС = головной и спинной мозг; ПНС связывает ЦНС с телом.','CNS = brain and spinal cord; PNS connects the CNS with the body.'],['Кора, мозжечок и ствол вносят разные, но взаимодействующие вклады.','Cortex, cerebellum, and brainstem make different but interacting contributions.'],['Сложные функции поддерживаются сетями, а не изолированными «центрами».','Complex functions rely on networks, not isolated “centres”.']],exam:['Строение нервной системы, роль отделов мозга и рефлекторные пути.','Nervous-system organisation, brain-region roles, and reflex pathways.'],questions:[{q:['Что входит в центральную нервную систему человека?','What makes up the human central nervous system?'],a:[['Головной и спинной мозг','The brain and spinal cord'],['Только нервы конечностей','Only the nerves in the limbs'],['Только органы чувств','Only the sense organs']],c:0,e:['ЦНС состоит из головного и спинного мозга.','The CNS consists of the brain and spinal cord.']},{q:['Какой отдел особенно важен для координации и корректировки движений?','Which region is especially important for coordinating and adjusting movement?'],a:[['Мозжечок','Cerebellum'],['Сетчатка','Retina'],['Гипофиз','Pituitary gland']],c:0,e:['Мозжечок участвует в координации, точности и моторном обучении.','The cerebellum contributes to coordination, precision, and motor learning.']},{q:['Как точнее описать сложные функции мозга?','How are complex brain functions best described?'],a:[['Они часто возникают благодаря взаимодействию сетей','They often emerge from interacting networks'],['Каждая функция принадлежит только одной точке','Each function belongs to only one point'],['Они не связаны с нервными клетками','They are unrelated to nerve cells']],c:0,e:['Большинство сложных функций распределены по взаимосвязанным системам.','Most complex functions are distributed across interconnected systems.']}]},
+      {id:'senses',category:'systems',title:['Органы чувств и восприятие','Senses and perception'],keywords:'зрение слух рецептор сетчатка улитка сенсорный сигнал свет звук зрительный слуховой retina cochlea sensory',intro:['Сенсорные системы преобразуют энергию среды в нервные сигналы и обрабатывают их на нескольких уровнях.','Sensory systems transform environmental energy into neural signals and process them at multiple levels.'],body:['Рецепторы реагируют на определённый вид энергии или химическое воздействие. Фоторецепторы сетчатки преобразуют свет; волосковые клетки внутреннего уха реагируют на колебания и движение жидкости. Сенсорная информация идёт по специфическим путям в мозг, где она объединяется с контекстом, вниманием и предыдущим опытом. Поэтому восприятие — активная обработка, а не точная копия внешнего мира.','Receptors respond to particular forms of energy or chemical stimuli. Retinal photoreceptors convert light; inner-ear hair cells respond to vibration and fluid movement. Sensory information travels along specific pathways to the brain, where it is combined with context, attention, and prior experience. Perception is therefore active processing, not a perfect copy of the outside world.'],keys:[['Трансдукция — превращение стимула в электрический клеточный сигнал.','Transduction converts a stimulus into an electrical cellular signal.'],['Разные рецепторы настроены на разные стимулы.','Different receptors are tuned to different stimuli.'],['Восприятие зависит от обработки и контекста, а не только от рецептора.','Perception depends on processing and context, not only on receptors.']],exam:['Рецепторы, органы чувств, пути передачи и обработка информации.','Receptors, sense organs, transmission pathways, and information processing.'],questions:[{q:['Как называется преобразование стимула в сигнал рецепторной клетки?','What is the conversion of a stimulus into a receptor-cell signal called?'],a:[['Сенсорная трансдукция','Sensory transduction'],['Репликация','Replication'],['Осмос','Osmosis']],c:0,e:['Трансдукция преобразует физическую или химическую энергию в клеточный сигнал.','Transduction converts physical or chemical energy into a cellular signal.']},{q:['Какие клетки сетчатки воспринимают свет?','Which retinal cells detect light?'],a:[['Фоторецепторы','Photoreceptors'],['Эритроциты','Red blood cells'],['Клетки печени','Liver cells']],c:0,e:['Палочки и колбочки — фоторецепторы сетчатки.','Rods and cones are retinal photoreceptors.']},{q:['Почему восприятие может зависеть от контекста?','Why can perception depend on context?'],a:[['Мозг объединяет сенсорную информацию с опытом и другими сигналами','The brain combines sensory input with experience and other signals'],['Рецепторы всегда создают полное изображение','Receptors always create a complete picture'],['Сенсорные пути не достигают мозга','Sensory pathways do not reach the brain']],c:0,e:['Интерпретация сигнала происходит в нервных сетях и зависит от контекста.','Signal interpretation occurs in neural networks and depends on context.']}]},
+      {id:'movement',category:'systems',title:['Движение, рефлексы и обратная связь','Movement, reflexes, and feedback'],keywords:'движение мышца моторный нейрон спинной мозг рефлекс проприоцепция обратная связь muscle motor neuron spinal cord reflex proprioception',intro:['Движение возникает благодаря согласованной работе нервных путей, мышц и сенсорной обратной связи.','Movement depends on coordinated neural pathways, muscles, and sensory feedback.'],body:['Команда из центральной нервной системы может пройти по двигательному нейрону к мышце; в нервно-мышечном соединении ацетилхолин помогает запустить сокращение мышечного волокна. Рефлекторная дуга позволяет быстро ответить на стимул через спинной мозг, хотя мозг может получать информацию и менять дальнейшее действие. Проприорецепторы сообщают о положении и движении частей тела, помогая корректировать движение.','A command from the central nervous system can travel along a motor neuron to a muscle; at the neuromuscular junction, acetylcholine helps initiate muscle-fibre contraction. A reflex arc enables a rapid response through the spinal cord, although the brain can receive information and modify subsequent action. Proprioceptors signal body position and movement, helping adjust motion.'],keys:[['Двигательные команды идут от ЦНС к мышцам по моторным нейронам.','Motor commands travel from the CNS to muscles along motor neurons.'],['Рефлекс — быстрый ответ по нервной дуге; мозг всё равно может получить сигнал.','A reflex is a rapid response through a neural arc; the brain can still receive the signal.'],['Сенсорная обратная связь помогает уточнять движения.','Sensory feedback helps refine movement.']],exam:['Рефлекторная дуга, моторные нейроны и роль обратной связи.','Reflex arcs, motor neurons, and the role of feedback.'],questions:[{q:['Какое звено передаёт команду от ЦНС к скелетной мышце?','Which component carries a command from the CNS to skeletal muscle?'],a:[['Двигательный нейрон','A motor neuron'],['Фоторецептор','A photoreceptor'],['Нейрон сетчатки только','A retinal neuron only']],c:0,e:['Двигательные нейроны проводят сигналы к эффекторам, например мышцам.','Motor neurons carry signals to effectors such as muscles.']},{q:['Что является примером обратной связи при движении?','What is an example of feedback during movement?'],a:[['Сенсорные сигналы о положении конечности','Sensory signals about limb position'],['Случайное изменение генетического кода','A random change in genetic code'],['Выделение пищеварительного фермента','Release of a digestive enzyme']],c:0,e:['Проприоцептивная информация помогает мозгу оценить положение тела и скорректировать движение.','Proprioceptive information helps the brain estimate body position and adjust movement.']},{q:['Где проходит простая рефлекторная дуга от рецептора к двигательному ответу?','Where can a simple reflex arc run from receptor to motor response?'],a:[['Через спинной мозг','Through the spinal cord'],['Только через сетчатку','Only through the retina'],['Через кости без нервов','Through bones without nerves']],c:0,e:['Многие простые рефлексы интегрируются в спинном мозге.','Many simple reflexes are integrated in the spinal cord.']}]},
+      {id:'memory',category:'functions',title:['Память, обучение и нейропластичность','Memory, learning, and neuroplasticity'],keywords:'память обучение гиппокамп синаптическая пластичность долговременное потенцирование консолидация hippocampus synaptic plasticity learning',intro:['Обучение меняет знания и навыки, а память позволяет кодировать, сохранять и извлекать информацию. Нейропластичность — способность нервной системы изменяться с опытом.','Learning changes knowledge and skills; memory allows information to be encoded, stored, and retrieved. Neuroplasticity is the nervous system’s capacity to change with experience.'],body:['Память не хранится как один файл в одной точке мозга. Разные системы поддерживают навыки, факты, события и другие виды информации. Гиппокамп важен для формирования многих новых декларативных воспоминаний и их последующей консолидации, но долговременные представления распределены по сетям. Изменения эффективности синапсов и перестройка связей являются одним из механизмов пластичности. Практика извлечения и распределённое повторение помогают учиться, но не гарантируют одинаковый результат для всех.','Memory is not stored as one file in a single brain location. Different systems support skills, facts, events, and other kinds of information. The hippocampus is important for forming many new declarative memories and their later consolidation, while long-term representations are distributed across networks. Changes in synaptic efficacy and connectivity are among the mechanisms of plasticity. Retrieval practice and spaced review can support learning, though outcomes vary between people.'],keys:[['Память включает кодирование, сохранение и извлечение.','Memory involves encoding, storage, and retrieval.'],['Гиппокамп важен для многих новых декларативных воспоминаний.','The hippocampus is important for many new declarative memories.'],['Пластичность охватывает изменения эффективности и связей нейронных сетей.','Plasticity includes changes in the efficacy and connectivity of neural networks.']],exam:['Память и обучение, мозговые сети, нейропластичность и исследовательские данные.','Memory and learning, brain networks, neuroplasticity, and research evidence.'],questions:[{q:['Какова важная роль гиппокампа в памяти?','What is an important role of the hippocampus in memory?'],a:[['Формирование многих новых декларативных воспоминаний','Forming many new declarative memories'],['Преобразование света в сигнал','Converting light into a signal'],['Сокращение мышечного волокна','Contracting a muscle fibre']],c:0,e:['Гиппокамп участвует в формировании и консолидации многих новых воспоминаний.','The hippocampus contributes to forming and consolidating many new memories.']},{q:['Что означает нейропластичность?','What does neuroplasticity mean?'],a:[['Способность нервной системы изменяться с опытом','The nervous system’s capacity to change with experience'],['Неспособность нейронов передавать сигналы','An inability of neurons to transmit signals'],['Образование только новых костей','Formation of new bones only']],c:0,e:['Пластичность включает изменения функции и структуры нейронных сетей.','Plasticity includes functional and structural changes in neural networks.']},{q:['Какой подход обычно поддерживает долговременное запоминание?','Which approach generally supports long-term retention?'],a:[['Повторение с интервалами и активное извлечение информации','Spaced review and active retrieval'],['Однократное перечитывание без проверки','Reading once without testing'],['Отказ от обратной связи','Avoiding feedback']],c:0,e:['Активная практика извлечения и распределённые повторы полезны для запоминания.','Active retrieval practice and spaced reviews can support retention.']}]},
+      {id:'sleep',category:'functions',title:['Сон и биологические ритмы','Sleep and biological rhythms'],keywords:'сон циркадный ритм мелатонин свет внутренние часы REM NREM suprachiasmatic nucleus',intro:['Сон — активное состояние, организованное нервными сетями и внутренними биологическими часами. Циркадные ритмы согласуют процессы организма примерно с суточным циклом.','Sleep is an active state organised by neural networks and internal biological clocks. Circadian rhythms coordinate body processes on an approximately daily cycle.'],body:['Циркадная система получает информацию о времени суток, в том числе от света, поступающего через сетчатку. Супрахиазматическое ядро гипоталамуса — ключевой генератор циркадных ритмов у человека. Сон включает чередование NREM- и REM-состояний; их характеристики и длительность меняются в течение ночи и с возрастом. Сон участвует в восстановлении и процессах памяти, но конкретные эффекты зависят от множества факторов.','The circadian system receives information about time of day, including light signals from the retina. The suprachiasmatic nucleus in the hypothalamus is a key circadian pacemaker in humans. Sleep cycles through NREM and REM states; their features and duration change across the night and with age. Sleep contributes to restoration and memory processes, though specific effects depend on many factors.'],keys:[['Циркадные часы задают внутреннюю временную организацию организма.','Circadian clocks provide internal timing for the body.'],['Световая информация помогает синхронизировать суточные ритмы.','Light information helps synchronise daily rhythms.'],['Сон включает циклы NREM и REM.','Sleep includes NREM and REM cycles.']],exam:['Гомеостаз и регуляция, биологические ритмы, роль внешних сигналов.','Homeostasis and regulation, biological rhythms, and environmental cues.'],questions:[{q:['Какой сигнал помогает синхронизировать циркадные ритмы с днём и ночью?','Which cue helps synchronise circadian rhythms with day and night?'],a:[['Свет','Light'],['Звук костей','Bone sounds'],['Кислород из мышц напрямую','Oxygen directly from muscles']],c:0,e:['Свет — важный временной сигнал для циркадной системы.','Light is an important timing cue for the circadian system.']},{q:['Где расположено супрахиазматическое ядро?','Where is the suprachiasmatic nucleus located?'],a:[['В гипоталамусе','In the hypothalamus'],['В сетчатке','In the retina'],['В мозжечке','In the cerebellum']],c:0,e:['Супрахиазматическое ядро гипоталамуса — ключевой циркадный генератор.','The hypothalamic suprachiasmatic nucleus is a key circadian pacemaker.']},{q:['Какие состояния чередуются во время нормального сна?','Which states alternate during normal sleep?'],a:[['NREM и REM','NREM and REM'],['Только бодрствование','Wakefulness only'],['Репликация и транскрипция','Replication and transcription']],c:0,e:['Ночной сон организован в циклы NREM- и REM-состояний.','Night-time sleep is organised into cycles of NREM and REM states.']}]},
+      {id:'hormones',category:'biology',title:['Нервная и эндокринная регуляция','Nervous and endocrine regulation'],keywords:'гормоны эндокринная система гомеостаз гипоталамус гипофиз обратная связь hormone endocrine homeostasis hypothalamus pituitary',intro:['Нервная и эндокринная системы вместе координируют работу организма. Их сигналы различаются по способу передачи и времени действия.','The nervous and endocrine systems coordinate the body together. Their signals differ in how they travel and how quickly they act.'],body:['Нервные импульсы быстро передаются по конкретным клеткам и путям; гормоны переносятся кровью и воздействуют на клетки с соответствующими рецепторами. Эндокринные эффекты часто развиваются медленнее и могут быть более длительными, однако это зависит от гормона и контекста. Гипоталамус связывает нервную и эндокринную регуляцию. Отрицательная обратная связь помогает поддерживать внутренние параметры в диапазоне, совместимом с нормальной работой организма.','Neural impulses travel rapidly along specific cells and pathways; hormones are carried in blood and act on cells with the relevant receptors. Endocrine effects often develop more slowly and may last longer, though this depends on the hormone and context. The hypothalamus links neural and endocrine regulation. Negative feedback helps keep internal variables within ranges compatible with normal body function.'],keys:[['Гормон действует на клетки с подходящими рецепторами.','A hormone acts on cells with appropriate receptors.'],['Гипоталамус связывает нервную и эндокринную системы.','The hypothalamus links neural and endocrine systems.'],['Отрицательная обратная связь помогает поддерживать гомеостаз.','Negative feedback helps maintain homeostasis.']],exam:['Эндокринные железы, гормоны, регуляция и поддержание гомеостаза.','Endocrine glands, hormones, regulation, and homeostasis.'],questions:[{q:['Как гормон обычно достигает удалённой клетки-мишени?','How does a hormone typically reach a distant target cell?'],a:[['Переносится кровью','It is carried in the blood'],['Проводится только по аксону','It travels only along an axon'],['Передаётся через кость','It is transmitted through bone']],c:0,e:['Эндокринные гормоны выделяются в кровь и достигают клеток-мишеней.','Endocrine hormones enter the blood and reach target cells.']},{q:['Что нужно клетке, чтобы специфически отвечать на гормон?','What does a cell need to respond specifically to a hormone?'],a:[['Соответствующий рецептор','The matching receptor'],['Аксон','An axon'],['Фоторецептор','A photoreceptor']],c:0,e:['Гормон связывается со своим рецептором на клетке-мишени или внутри неё.','A hormone binds its receptor on or inside a target cell.']},{q:['Как отрицательная обратная связь способствует гомеостазу?','How does negative feedback support homeostasis?'],a:[['Ответ уменьшает отклонение регулируемого параметра','The response reduces deviation in the regulated variable'],['Всегда усиливает исходное отклонение','It always amplifies the original deviation'],['Останавливает все клеточные реакции','It stops all cellular reactions']],c:0,e:['Отрицательная обратная связь противодействует изменению и помогает вернуть параметр к диапазону нормы.','Negative feedback opposes change and helps return a variable towards its normal range.']}]},
+      {id:'research',category:'biology',title:['Как изучают мозг: методы и доказательства','Studying the brain: methods and evidence'],keywords:'научный метод исследование эксперимент корреляция причинность EEG ЭЭГ MRI МРТ fMRI фМРТ выборка ограничение evidence',intro:['Нейронаука использует поведенческие задачи, регистрацию электрической активности, визуализацию мозга и другие методы. Каждый метод отвечает на разные вопросы и имеет ограничения.','Neuroscience uses behavioural tasks, recordings of electrical activity, brain imaging, and other methods. Each method answers different questions and has limitations.'],body:['МРТ показывает анатомическую структуру; фМРТ оценивает изменения сигнала, связанного с оксигенацией крови, и не измеряет мысли напрямую. ЭЭГ регистрирует электрические потенциалы у поверхности головы с высокой временной, но более ограниченной пространственной точностью. Наблюдаемая корреляция сама по себе не доказывает причинность. При оценке исследования учитывай размер и состав выборки, контрольные условия, измерения, повторяемость и то, можно ли обобщать выводы.','MRI depicts anatomical structure; fMRI measures changes in a blood-oxygenation-related signal and does not directly measure thoughts. EEG records electrical potentials at the scalp with high temporal but more limited spatial precision. An observed correlation alone does not establish causation. When evaluating a study, consider sample size and composition, controls, measurements, replication, and whether conclusions generalise.'],keys:[['Метод выбирают в зависимости от вопроса; у каждого есть ограничения.','Choose methods to fit the question; every method has limitations.'],['ЭЭГ хорошо показывает изменения во времени; фМРТ — косвенный гемодинамический сигнал.','EEG tracks timing well; fMRI measures an indirect haemodynamic signal.'],['Корреляция не доказывает причинно-следственную связь.','Correlation does not prove a causal relationship.']],exam:['Планирование исследования, переменные и контроль, интерпретация данных и ограничений.','Study design, variables and controls, data interpretation, and limitations.'],questions:[{q:['Что регистрирует ЭЭГ?','What does EEG record?'],a:[['Электрические потенциалы у поверхности головы','Electrical potentials at the scalp'],['Только строение костей','Bone structure only'],['Концентрацию гормонов в крови мозга','Hormone concentration in brain blood']],c:0,e:['ЭЭГ регистрирует суммарную электрическую активность, измеряемую электродами на коже головы.','EEG records summed electrical activity measured with electrodes on the scalp.']},{q:['Почему корреляция активности мозга с поведением не доказывает причинность?','Why does a correlation between brain activity and behaviour not prove causation?'],a:[['Возможны третьи переменные и альтернативные объяснения','Third variables and alternative explanations may exist'],['Корреляции невозможны в биологии','Correlations are impossible in biology'],['Мозговая активность не измеряется','Brain activity cannot be measured']],c:0,e:['Чтобы обосновать причинность, нужны подходящий дизайн и контроль альтернативных объяснений.','Establishing causation requires suitable study design and control of alternative explanations.']},{q:['Что измеряет фМРТ в типичном исследовании?','What does fMRI measure in a typical study?'],a:[['Изменение сигнала, связанного с оксигенацией крови','Changes in a signal related to blood oxygenation'],['Нейромедиаторы напрямую в каждом синапсе','Neurotransmitters directly at every synapse'],['Сознательные мысли как отдельные объекты','Conscious thoughts as isolated objects']],c:0,e:['ФМРТ использует косвенный гемодинамический сигнал, связанный с активностью.','fMRI uses an indirect haemodynamic signal associated with activity.']}]}
+    ];
+
+    const storageKey = 'neuroctivity-workbook-v1';
+    const languageButton = document.getElementById('lang-toggle');
+    const themeButton = document.getElementById('theme-toggle');
+    const searchInput = document.getElementById('topic-search');
+    const filterSelect = document.getElementById('topic-filter');
+    const topicList = document.getElementById('topic-list');
+    const topicCount = document.getElementById('topic-count');
+    const lesson = document.getElementById('lesson');
+    let language = 'ru';
+    let activeTopicId = topics[0].id;
+    let saved = {notes:{},best:{},currentTopic:topics[0].id};
+    let storageError = false;
+
+    const text = value => Array.isArray(value) ? value[language === 'ru' ? 0 : 1] : value;
+    const setTheme = theme => {
+      const current=theme==='dark'?'dark':'light';
+      document.documentElement.dataset.theme=current;
+      themeButton.textContent=current==='dark'?'☀':'☾';
+      themeButton.setAttribute('aria-label',current==='dark'?'Switch to light theme':'Switch to dark theme');
+      themeButton.title=current==='dark'?'Switch to light theme':'Switch to dark theme';
+    };
+    setTheme(document.documentElement.dataset.theme);
+    themeButton.addEventListener('click',()=>{
+      const next=document.documentElement.dataset.theme==='dark'?'light':'dark';
+      setTheme(next);
+      try{localStorage.setItem('neuroctivity-theme',next);}catch(error){console.warn('Could not save the selected theme.',error);}
+    });
+    window.addEventListener('storage',event=>{
+      if(event.key==='neuroctivity-theme'&&event.newValue)setTheme(event.newValue);
+    });
+    const escapeHtml = value => String(value).replace(/[&<>"']/g, char => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[char]));
+    const setStorageStatus = (element, customText) => {
+      if (customText) { element.textContent = customText; return; }
+      element.textContent = language === 'ru'
+        ? (storageError ? 'Не удалось сохранить данные в этом браузере. Экспортируйте заметки, чтобы не потерять их.' : 'Автосохранение включено · только на этом устройстве')
+        : (storageError ? 'Could not save in this browser. Export your notes to avoid losing them.' : 'Autosave is on · this device only');
+    };
+    const persist = () => {
+      try {
+        localStorage.setItem(storageKey, JSON.stringify(saved));
+        storageError = false;
+        return true;
+      } catch (error) {
+        storageError = true;
+        console.error('Workbook data could not be saved to local storage.', error);
+        return false;
+      }
+    };
+    const loadSaved = () => {
+      try {
+        const data = JSON.parse(localStorage.getItem(storageKey) || '{}');
+        if (data && typeof data === 'object' && !Array.isArray(data)) {
+          saved = {
+            notes: data.notes && typeof data.notes === 'object' && !Array.isArray(data.notes) ? data.notes : {},
+              best: data.best && typeof data.best === 'object' && !Array.isArray(data.best) ? data.best : {},
+              currentTopic: topics.some(topic => topic.id === data.currentTopic) ? data.currentTopic : topics[0].id
+            };
+            activeTopicId = saved.currentTopic;
+        }
+      } catch (error) {
+        storageError = true;
+        console.error('Workbook data could not be read from local storage.', error);
+      }
+    };
+    const categoryName = id => {
+      const category = categories.find(item => item.id === id);
+      return category ? category[language] : '';
+    };
+    const updateFilter = () => {
+      const current = filterSelect.value;
+      filterSelect.innerHTML = `<option value="all">${language === 'ru' ? 'Все разделы' : 'All categories'}</option>` +
+        categories.map(category => `<option value="${category.id}">${escapeHtml(category[language])}</option>`).join('');
+      filterSelect.value = categories.some(category => category.id === current) ? current : 'all';
+      filterSelect.setAttribute('aria-label', language === 'ru' ? 'Фильтр по разделу' : 'Filter by category');
+      searchInput.placeholder = language === 'ru' ? 'Например: нейрон, память, зрение…' : 'For example: neuron, memory, vision…';
+      searchInput.setAttribute('aria-label', language === 'ru' ? 'Поиск по темам' : 'Search topics');
+    };
+    const visibleTopics = () => {
+      const query = searchInput.value.trim().toLocaleLowerCase();
+      const category = filterSelect.value;
+      return topics.filter(topic => {
+        const searchable = [topic.title[0],topic.title[1],topic.intro[0],topic.intro[1],topic.body[0],topic.body[1],topic.keywords].join(' ').toLocaleLowerCase();
+        return (!query || searchable.includes(query)) && (category === 'all' || topic.category === category);
+      });
+    };
+    const renderList = () => {
+      const shown = visibleTopics();
+      topicCount.textContent = `${shown.length} / ${topics.length}`;
+      if (!shown.length) {
+        topicList.innerHTML = `<div class="empty">${language === 'ru' ? 'Ничего не найдено. Попробуйте другое слово или раздел.' : 'No topics found. Try a different word or category.'}</div>`;
+        return;
+      }
+      topicList.innerHTML = shown.map(topic => `<button class="topic-button" type="button" data-topic="${topic.id}" aria-current="${topic.id === activeTopicId ? 'true' : 'false'}"><strong>${escapeHtml(text(topic.title))}</strong><span>${escapeHtml(categoryName(topic.category))}</span></button>`).join('');
+    };
+    const renderLesson = () => {
+      const topic = topics.find(item => item.id === activeTopicId);
+      if (!topic) return;
+      const note = typeof saved.notes[topic.id] === 'string' ? saved.notes[topic.id] : '';
+      const best = Number(saved.best[topic.id]) || 0;
+      lesson.innerHTML = `
+        <div class="lesson-top"><span class="tag">${escapeHtml(categoryName(topic.category))}</span><span class="best">${language === 'ru' ? `Лучший результат: ${best}%` : `Best score: ${best}%`}</span></div>
+        <h2>${escapeHtml(text(topic.title))}</h2>
+        <p class="lesson-intro">${escapeHtml(text(topic.intro))}</p>
+        <div class="lesson-copy">${escapeHtml(text(topic.body))}</div>
+        <h3>${language === 'ru' ? 'Главное' : 'Key ideas'}</h3>
+        <ul class="key-points">${topic.keys.map(point => `<li>${escapeHtml(text(point))}</li>`).join('')}</ul>
+        <div class="exam-box"><strong>${language === 'ru' ? 'Связь с экзаменационной программой' : 'Exam-course connection'}</strong><p>${escapeHtml(text(topic.exam))}<br>${language === 'ru' ? 'Подходит для повторения тем ЕГЭ, GCSE/IGCSE, IB и AP; это учебный материал проекта, а не официальный банк заданий.' : 'Useful for revising ЕГЭ, GCSE/IGCSE, IB, and AP topics; this is project learning material, not an official question bank.'}</p></div>
+        <section class="quiz-box" aria-labelledby="quiz-title"><div class="quiz-head"><h3 id="quiz-title">${language === 'ru' ? 'Проверь себя' : 'Test yourself'}</h3><span class="muted">${topic.questions.length} ${language === 'ru' ? 'вопроса' : 'questions'}</span></div><div class="quiz-questions" id="quiz-questions"></div><div class="quiz-actions"><button class="button" id="check-quiz" type="button">${language === 'ru' ? 'Проверить ответы' : 'Check answers'}</button><button class="button secondary" id="retry-quiz" type="button">${language === 'ru' ? 'Перемешать и начать заново' : 'Shuffle and try again'}</button></div><p class="quiz-result" id="quiz-result" aria-live="polite" hidden></p></section>
+        <section class="note-box" aria-labelledby="notes-title"><div class="note-head"><h3 id="notes-title">${language === 'ru' ? 'Мои заметки по теме' : 'My notes for this topic'}</h3><div class="note-actions"><button class="button secondary small" id="export-notes" type="button">${language === 'ru' ? 'Скачать заметки' : 'Export notes'}</button><button class="button secondary small" id="clear-note" type="button">${language === 'ru' ? 'Очистить тему' : 'Clear topic'}</button></div></div><label for="topic-notes">${language === 'ru' ? 'Запиши определения, вопросы или то, что нужно повторить.' : 'Write definitions, questions, or ideas to review.'}</label><textarea id="topic-notes" placeholder="${language === 'ru' ? 'Начни печатать — заметка сохранится автоматически…' : 'Start typing — your note is saved automatically…'}">${escapeHtml(note)}</textarea><p class="note-status" id="note-status" aria-live="polite"></p></section>`;
+      renderQuiz(topic);
+      const noteField = document.getElementById('topic-notes');
+      const noteStatus = document.getElementById('note-status');
+      setStorageStatus(noteStatus);
+      noteField.addEventListener('input', () => {
+        saved.notes[topic.id] = noteField.value;
+        const success = persist();
+        setStorageStatus(noteStatus, success ? (language === 'ru' ? 'Заметка сохранена.' : 'Note saved.') : undefined);
+      });
+      document.getElementById('export-notes').addEventListener('click', exportNotes);
+      document.getElementById('clear-note').addEventListener('click', () => {
+        const confirmed = window.confirm(language === 'ru' ? 'Очистить заметки только по этой теме?' : 'Clear notes for this topic only?');
+        if (!confirmed) return;
+        delete saved.notes[topic.id];
+        const success = persist();
+        noteField.value = '';
+        setStorageStatus(noteStatus, success ? (language === 'ru' ? 'Заметки по теме очищены.' : 'Topic notes cleared.') : undefined);
+      });
+    };
+    const renderQuiz = topic => {
+      const questions = [...topic.questions].sort(() => Math.random() - .5).map(question => {
+        const options = question.a.map((answer,index) => ({answer,index})).sort(() => Math.random() - .5);
+        return {...question,options};
+      });
+      const container = document.getElementById('quiz-questions');
+      const result = document.getElementById('quiz-result');
+      container.innerHTML = questions.map((question,index) => `<fieldset class="question"><legend>${index + 1}. ${escapeHtml(text(question.q))}</legend><div class="answers">${question.options.map(option => `<label class="answer"><input type="radio" name="answer-${index}" value="${option.index}"><span>${escapeHtml(text(option.answer))}</span></label>`).join('')}</div><p class="feedback" id="feedback-${index}" hidden></p></fieldset>`).join('');
+      document.getElementById('check-quiz').onclick = () => {
+        let score = 0;
+        let unanswered = 0;
+        questions.forEach((question,index) => {
+          const chosen = container.querySelector(`input[name="answer-${index}"]:checked`);
+          const feedback = document.getElementById(`feedback-${index}`);
+          const correct = chosen && Number(chosen.value) === question.c;
+          if (!chosen) unanswered += 1;
+          if (correct) score += 1;
+          feedback.hidden = false;
+          feedback.className = `feedback ${correct ? 'correct' : 'incorrect'}`;
+          feedback.textContent = `${correct ? (language === 'ru' ? 'Верно. ' : 'Correct. ') : (language === 'ru' ? `Правильный ответ: ${text(question.a[question.c])}. ` : `Correct answer: ${text(question.a[question.c])}. `)}${text(question.e)}`;
+          container.querySelectorAll(`input[name="answer-${index}"]`).forEach(input => { input.disabled = true; });
+        });
+        const percent = Math.round(score / questions.length * 100);
+        saved.best[topic.id] = Math.max(Number(saved.best[topic.id]) || 0,percent);
+        const scoreSaved = persist();
+        result.hidden = false;
+        const scoreMessage = unanswered
+          ? (language === 'ru' ? `Результат: ${score} из ${questions.length}. Без ответа: ${unanswered}.` : `Score: ${score} out of ${questions.length}. Unanswered: ${unanswered}.`)
+          : (language === 'ru' ? `Результат: ${score} из ${questions.length} (${percent}%).` : `Score: ${score} out of ${questions.length} (${percent}%).`);
+        result.textContent = `${scoreMessage} ${scoreSaved
+          ? (language === 'ru' ? 'Лучший результат сохранён в этом браузере.' : 'Best score saved in this browser.')
+          : (language === 'ru' ? 'Не удалось сохранить результат в этом браузере.' : 'Could not save your score in this browser.')}`;
+        document.querySelector('.best').textContent = language === 'ru' ? `Лучший результат: ${saved.best[topic.id]}%` : `Best score: ${saved.best[topic.id]}%`;
+        document.getElementById('check-quiz').disabled = true;
+      };
+      document.getElementById('retry-quiz').onclick = () => renderQuiz(topic);
+    };
+    const exportNotes = () => {
+      const entries = topics.filter(topic => typeof saved.notes[topic.id] === 'string' && saved.notes[topic.id].trim());
+      const content = entries.length
+        ? entries.map(topic => `${text(topic.title)}\n${'='.repeat(text(topic.title).length)}\n${saved.notes[topic.id].trim()}`).join('\n\n')
+        : (language === 'ru' ? 'Заметок пока нет.' : 'No notes yet.');
+      const blob = new Blob([content],{type:'text/plain;charset=utf-8'});
+      const url = URL.createObjectURL(blob);
+      const link = document.createElement('a');
+      link.href = url;
+      link.download = 'neuroctivity-notes.txt';
+      link.click();
+      setTimeout(() => URL.revokeObjectURL(url),1000);
+    };
+
+    loadSaved();
+    updateFilter();
+    renderList();
+    renderLesson();
+    topicList.addEventListener('click', event => {
+      const button = event.target.closest('[data-topic]');
+      if (!button) return;
+      activeTopicId = button.dataset.topic;
+      saved.currentTopic = activeTopicId;
+      persist();
+      renderList();
+      renderLesson();
+      if (window.matchMedia('(max-width: 850px)').matches) lesson.scrollIntoView({behavior:'smooth',block:'start'});
+    });
+    searchInput.addEventListener('input', () => {
+      renderList();
+      const shown = visibleTopics();
+      if (shown.length && !shown.some(topic => topic.id === activeTopicId)) {
+        activeTopicId = shown[0].id;
+        saved.currentTopic = activeTopicId;
+        persist();
+        renderList();
+        renderLesson();
+      }
+    });
+    filterSelect.addEventListener('change', () => {
+      renderList();
+      const shown = visibleTopics();
+      if (shown.length && !shown.some(topic => topic.id === activeTopicId)) {
+        activeTopicId = shown[0].id;
+        saved.currentTopic = activeTopicId;
+        persist();
+        renderList();
+        renderLesson();
+      }
+    });
+    languageButton.addEventListener('click', () => {
+      language = language === 'ru' ? 'en' : 'ru';
+      document.documentElement.lang = language;
+      document.querySelectorAll('[data-ru]').forEach(node => { node.hidden = language !== 'ru'; });
+      document.querySelectorAll('[data-en]').forEach(node => { node.hidden = language !== 'en'; });
+      languageButton.setAttribute('aria-label',language === 'ru' ? 'Switch language to English' : 'Сменить язык на русский');
+      updateFilter();
+      renderList();
+      renderLesson();
+    });
+  </script>
+</body>
+</html>

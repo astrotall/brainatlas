@@ -1,0 +1,15 @@
+[build]
+  command = ""
+  publish = "."
+
+[[redirects]]
+  from = "/.account-data"
+  to = "/404"
+  status = 404
+  force = true
+
+[[redirects]]
+  from = "/.account-data/*"
+  to = "/404"
+  status = 404
+  force = true
