@@ -1,0 +1,4 @@
+title = "Neuroctivity secret scan"
+
+[extend]
+useDefault = true

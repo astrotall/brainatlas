@@ -1,0 +1,5 @@
+pnpm run ci
+
+if git diff --cached --name-only | grep -qE '^(api/|backend/|pyproject\.toml$|uv\.lock$|\.python-version$|Makefile$)'; then
+  make check test coverage-gate
+fi

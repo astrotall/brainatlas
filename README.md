@@ -4,6 +4,8 @@ Static, bilingual neuroscience learning site for secondary-school students and l
 
 ## Pages
 
+The pages and other public files live in `public/` and are served from the site root exactly as they are.
+
 - `index.html` — course topics, interactive atlas entry point, and the curated external resource library.
 - `workbook.html` — bilingual searchable topic guide, topic-specific quizzes with explanations, and private local notes with text export.
 - `mozg-3d-atlas-2.html` — the interactive 3D brain atlas: 28 structures, 13 animated processes (memory, stress physiology, reward prediction error, sleep, vision, speech, movement, pain, attention, circadian rhythm, plasticity, hunger, breathing), 9 neurotransmitters, a "find the structure" trainer, search, and reference cards (what is real on the model, limits of the model, licences). Opens with `?mode=<id>` to start on a given topic, for example `?mode=p:memory` or `?mode=c:dopamine`.
@@ -11,7 +13,7 @@ Static, bilingual neuroscience learning site for secondary-school students and l
 - `LICENSE-freesurfer.txt` — required licence for the modified surface data.
 - `LICENSE-atlas-data.txt` — notices for the other atlas data (MNI152 template, CBIG, three.js).
 
-There is no build step, account system, or API. Workbook notes and best quiz scores are stored in the browser's local storage on the learner's device; notes can be exported as a text file. Nothing is sent to a server. The atlas has Three.js, its data and the fonts embedded in the page, so it works offline; the fonts are embedded too (Manrope, SIL OFL 1.1; monospaced labels use the system font), so the site makes no third-party requests at all.
+There is no account system. The API in `api/` has only a health check so far; the pages do not call it. Workbook notes and best quiz scores are stored in the browser's local storage on the learner's device; notes can be exported as a text file. Nothing is sent to a server. The atlas has Three.js, its data and the fonts embedded in the page, so it works offline; the fonts are embedded too (Manrope, SIL OFL 1.1; monospaced labels use the system font), so the site makes no third-party requests at all.
 
 The brain atlas always uses a dark interface and 3D viewport for consistent contrast. The light/dark theme preference changes the homepage, workbook, and quiz, but does not affect the atlas. The language choice (`RU / EN`) is shared between all pages.
 
@@ -25,16 +27,32 @@ Attribution: "This product includes FreeSurfer developed by CorTechs Labs, Inc. 
 
 ## Embedding on the homepage
 
-The hero of `index.html` embeds the atlas in an iframe with `?embed=1&mode=p:memory`. In embed mode the atlas hides its interface, keeps the camera still and lets the visitor rotate the model. Security headers live in `_headers` only (the `netlify.toml` header block was removed so the two files cannot disagree); they allow same-origin framing (`frame-ancestors 'self'`, `X-Frame-Options: SAMEORIGIN`). If a host still blocks the frame, the page detects it and shows `atlas-preview.jpg`, a rendered still of the model, in its place.
+The hero of `index.html` embeds the atlas in an iframe with `?embed=1&mode=p:memory`. In embed mode the atlas hides its interface, keeps the camera still and lets the visitor rotate the model. Custom security headers are not applied at the moment: `_headers` is a Netlify file kept in the repo root for reference and not published; headers move to the Next.js config in BRA-2. If a host blocks the frame, the page detects it and shows `atlas-preview.jpg`, a rendered still of the model, in its place.
+
+## Development
+
+The site is a [Next.js](https://nextjs.org/) App Router app (TypeScript, Tailwind CSS), statically generated and hosted on Vercel; the API is FastAPI in Python Vercel Functions under `/api`. Requires Node.js 22.18+ with pnpm (the version is pinned in `package.json`), and Python 3.12 with [uv](https://docs.astral.sh/uv/) for the API.
+
+```sh
+pnpm install            # also installs the git hooks
+pnpm dev                # http://localhost:3000
+pnpm build              # every route must be listed as static
+pnpm start              # serves the build on http://localhost:3000
+pnpm run ci             # typecheck + lint + format check + tests
+
+make install            # Python environment from uv.lock
+make check test coverage-gate
+make run                # API on http://127.0.0.1:8000/api/health
+```
+
+Project rules, architecture and the contribution workflow are in [CLAUDE.md](CLAUDE.md), [CONTRIBUTING.md](CONTRIBUTING.md) and [`.claude/`](.claude).
+
+## What is public
+
+Exactly the seven files in `public/`, at the site root. `/` and the short forms `/index`, `/workbook`, `/kira` and `/mozg-3d-atlas-2` are rewrites to the `.html` files, so both forms keep working with their query strings. Everything else in the repository returns 404.
 
 ## Deploy
 
-Upload the folder as a static site. For Netlify, the publish directory is `.` and the build command is empty. A local preview can be started with any static HTTP server, for example:
-
-```sh
-python3 -m http.server 8765
-```
-
-Open `http://127.0.0.1:8765/`.
+Import the repository in Vercel with the **Next.js** framework preset (the import screen may suggest FastAPI because of `pyproject.toml`; choose Next.js) and the default build settings. There is no `vercel.json`. Python functions in `api/` are built from the root `pyproject.toml` and `uv.lock`.
 
 The atlas describes the healthy brain only (anatomy, physiology, neurochemistry) and is not a diagnostic tool. The workbook provides independent practice on concepts relevant to ЕГЭ, GCSE/IGCSE, IB, and AP; it is not an official exam question bank. The external research links are third-party resources. Their content, access requirements, and age suitability are set by their respective publishers; advanced papers should be used with teacher guidance.
