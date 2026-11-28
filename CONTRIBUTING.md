@@ -125,9 +125,11 @@ own footer line, and comma-separate them in the PR title: `(BRA-6, BRA-7)`.
 
 Some files drift apart silently. Change them together:
 
-- **Any endpoint, request or response field, status code or error code** → the FastAPI models
-  and routes (the OpenAPI schema is generated from them) **and**
-  [`.claude/backend/api-contract.md`](.claude/backend/api-contract.md), in the same change.
+- **Any endpoint, request or response field, status code, error code or field reason** → the
+  FastAPI models and routes, `.claude/backend/openapi.json` (`make openapi`), the generated
+  types in `src/shared/api/generated` (`pnpm api:generate`) **and**
+  [`.claude/backend/api-contract.md`](.claude/backend/api-contract.md), in the same change. CI
+  fails when the schema or the types drift from the code.
 - **A route, published file or storage key** → `src/shared/config` and its tests. A URL that was
   public stays served.
 - **An i18n key** → both `ru` and `en`. A key that exists in only one locale is a bug.
@@ -175,7 +177,7 @@ Nothing else is needed from a fresh clone.
 
 - Always: `pnpm run ci` — typecheck, lint, format check, tests.
 - Only when the staged files touch `api/`, `backend/`, `pyproject.toml`, `uv.lock`,
-  `.python-version` or `Makefile`: `make check test coverage-gate`. A frontend developer without
+  `.python-version`, `Makefile` or `.claude/backend/openapi.json`: `make check test coverage-gate`. A frontend developer without
   Python installed is not blocked by the backend gate.
 
 If either is red, the commit is blocked.
@@ -190,10 +192,13 @@ status check on `main`:
 
 - **Frontend (strict)** — a "no JavaScript in source" guard (any tracked `*.js`, `*.jsx`, `*.mjs`
   or `*.cjs` outside `public/` fails; there are no exceptions today), `tsc`, ESLint (FSD layer
-  boundaries, strict TypeScript and complexity limits, `--max-warnings 0`), a Prettier check, the
-  Vitest suite (public surface, legacy URLs, atlas checksum, storage keys) and `next build`, which
-  fails if any route becomes dynamic.
-- **Backend** — `make check` (a guard that rejects `# type: ignore` / `# noqa` suppressions, Ruff
+  boundaries, strict TypeScript and complexity limits, `--max-warnings 0`), a Prettier check,
+  `pnpm api:check` (the generated API types match `.claude/backend/openapi.json`), the Vitest
+  suite (public surface, legacy URLs, API rewrites and the dev-only proxy, atlas checksum, storage
+  keys, a type-level check of the generated API types) and `next build`, which fails if any route
+  becomes dynamic. `src/shared/api/generated/` is excluded from ESLint and Prettier.
+- **Backend** — `make check` (a guard that rejects `# type: ignore` / `# noqa` suppressions, the
+  OpenAPI drift check, Ruff
   format check, Ruff lint with the complexity budget, mypy strict, import-linter layering
   contracts, vulture dead-code scan), `make test` and `make coverage-gate` (coverage floors).
 - **Backend dependency audit** — `make audit`, a pip-audit of the locked dependencies.

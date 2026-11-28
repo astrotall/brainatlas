@@ -47,6 +47,9 @@ jobs:
       - name: Format check (Prettier)
         run: pnpm format:check
 
+      - name: Generated API types match the committed OpenAPI schema
+        run: pnpm api:check
+
       - name: Test (public surface, legacy URLs, atlas checksum)
         run: pnpm test
 
@@ -67,7 +70,7 @@ jobs:
       - name: Install
         run: make install
 
-      - name: Check (suppression guard + format + lint incl. complexity budget + mypy strict + import-linter + dead code)
+      - name: Check (suppression guard + OpenAPI drift + format + lint incl. complexity budget + mypy strict + import-linter + dead code)
         run: make check
 
       - name: Test (starts the coverage data)

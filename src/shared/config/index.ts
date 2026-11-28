@@ -9,8 +9,18 @@ export {
   toPublicPath,
 } from './public-files';
 export type { PublicFile } from './public-files';
-export { LEGACY_REWRITES, ROUTE } from './routes';
-export type { LegacyRewrite } from './routes';
+export {
+  API_FORWARDED_PATH_PARAM,
+  API_FUNCTION_PATH,
+  API_PREFIX,
+  API_REWRITES,
+  buildRewrites,
+  LEGACY_REWRITES,
+  LOCAL_API_ORIGIN,
+  LOCAL_API_REWRITES,
+  ROUTE,
+} from './routes';
+export type { LegacyRewrite, Rewrite, RewriteOptions } from './routes';
 export { ALL_PATHS, buildSecurityHeaderRule } from './security-headers';
 export type { HeaderRule, ResponseHeader, SecurityHeadersOptions } from './security-headers';
 export { STORAGE_KEY } from './storage-keys';

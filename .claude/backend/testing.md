@@ -30,7 +30,14 @@ so tests get cheaper and more valuable the further in you go.
 | **Domain**      | Pure unit, no I/O       | Every commit, ms   | Review invariants, the status state machine, the visitor-hash rules.               |
 | **Application** | Unit against fake ports | Every commit       | Orchestration under success **and** every failure mode. No network.                |
 | **Adapters**    | Integration             | Separately, rarely | The seam with real Upstash, Turnstile, Telegram, the model. Not in the fast suite. |
-| **Transport**   | Contract tests          | Every commit       | Every status and body matches the generated OpenAPI schema; every error code.      |
+| **Transport**   | Contract tests          | Every commit       | Every status and body matches the committed `openapi.json`; every error code.      |
+
+Contract tests read `.claude/backend/openapi.json` through `backend/tests/transport/openapi.py`:
+`assert_documented` checks that a response's status is declared for the operation and that its
+body validates against the declared schema; `assert_error` checks the envelope, `no-store` and
+`nosniff`; `field_reasons` returns the `(field, reason)` pairs of a `422`. Assert on `code` and
+`reason`, never on `message`. A test that freezes the schema itself checks the published limits
+(`minimum`, `maxLength`, `enum`), because the frontend reads them from there.
 
 The bulk of the suite is domain + application. Adapters get a thin integration layer, not
 exhaustive coverage — you are not testing the provider's SDK.
@@ -41,13 +48,26 @@ This is the checklist. These are the cases worth writing; the happy path is assu
 
 ### Request validation (reviews)
 
-- `rating` at 0 (reject), 1 (accept), 5 (accept), 6 (reject), `"5"` as a string, `5.5`.
-- Text at the minimum length − 1, the minimum, the maximum, the maximum + 1 — after trimming.
-  Whitespace-only text is empty.
+- `rating` at 0 (reject), 1 (accept), 5 (accept), 6 (reject), `"5"` as a string, `5.0`, `5.5`,
+  `true`, `1e400`, `NaN`.
+- Text at the minimum length − 1, the minimum, the maximum, the maximum + 1 — after
+  normalization, counted in code points (an astral emoji is one). Whitespace-only text is empty.
 - A link in the text (`http://`, `https://`, `www.`, a bare domain) is rejected.
 - `lang` outside `ru` / `en` is rejected.
-- Unknown or extra fields are rejected.
-- Bad input yields `422 validation` in the documented error envelope, never a 500.
+- Unknown or extra fields are rejected; so is an unknown or repeated query parameter.
+- A body over 16 KiB, a body that is not JSON, a non-JSON content type and an absent body each
+  yield `422 validation_failed` with a `body` field, never a 500.
+- No validation error echoes the submitted value.
+- Bad input yields `422 validation_failed` in the documented error envelope, never a 500.
+
+### Routing and the envelope
+
+- Any unknown `/api` path, a wrong method (with the exact `Allow`), `HEAD` on every `GET`, and an
+  unhandled exception all answer the envelope.
+- The forwarded path: `/api/index?__path=…` routes as the original path with the original query;
+  a `__path` reaching any other path is dropped; a forwarded path with no route is `404`.
+- The local proxy exists only for `next dev` with `NODE_ENV=development`; every other phase and
+  `NODE_ENV` pair yields the deployed rewrites and identical headers (`api-rewrites.test.ts`).
 
 ### Abuse controls
 

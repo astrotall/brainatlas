@@ -1,4 +1,6 @@
 public/
+src/shared/api/generated/
+.claude/backend/openapi.json
 node_modules/
 .next/
 out/

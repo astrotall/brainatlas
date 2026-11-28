@@ -1,11 +1,12 @@
-.PHONY: install check guard fix test coverage-gate audit run
+.PHONY: install check guard openapi openapi-check fix test coverage-gate audit run
 
 PYTHON_PATHS = backend/src backend/tests api
+OPENAPI_SCHEMA = .claude/backend/openapi.json
 
 install:
 	uv sync --locked
 
-check: guard
+check: guard openapi-check
 	uv run ruff format --check $(PYTHON_PATHS)
 	uv run ruff check $(PYTHON_PATHS)
 	uv run mypy
@@ -15,6 +16,12 @@ check: guard
 guard:
 	@if grep -rniE '#\s*(type:\s*ignore|mypy:\s*ignore-errors|noqa|ruff:\s*noqa|pragma:\s*no cover)' $(PYTHON_PATHS); then \
 		echo 'error: suppression comments are not allowed; fix the code instead'; exit 1; fi
+
+openapi:
+	uv run python -m neuroctivity.openapi_export $(OPENAPI_SCHEMA)
+
+openapi-check:
+	uv run python -m neuroctivity.openapi_export --check $(OPENAPI_SCHEMA)
 
 fix:
 	uv run ruff format $(PYTHON_PATHS)
@@ -36,4 +43,4 @@ audit:
 		status=$$?; rm -f $$requirements; exit $$status
 
 run:
-	uv run uvicorn neuroctivity.main:create_app --factory --reload
+	API_DOCS_ENABLED=true uv run uvicorn neuroctivity.main:create_app --factory --reload

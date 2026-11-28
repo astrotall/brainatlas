@@ -5,6 +5,8 @@ from pydantic import BaseModel, ConfigDict
 
 from neuroctivity.application.health import CheckHealth
 from neuroctivity.domain.health import ServiceStatus
+from neuroctivity.transport.errors import error_responses
+from neuroctivity.transport.tags import Tag
 
 HEALTH_PATH = "/health"
 CHECK_HEALTH_STATE = "check_health"
@@ -26,6 +28,6 @@ def check_health_use_case(request: Request) -> CheckHealth:
     return use_case
 
 
-@router.get(HEALTH_PATH)
+@router.get(HEALTH_PATH, tags=[Tag.HEALTH], responses=error_responses())
 def read_health(check_health: Annotated[CheckHealth, Depends(check_health_use_case)]) -> HealthResponse:
     return HealthResponse(status=check_health().status)

@@ -13,7 +13,7 @@ The pages and other public files live in `public/` and are served from the site 
 - `LICENSE-freesurfer.txt` — required licence for the modified surface data.
 - `LICENSE-atlas-data.txt` — notices for the other atlas data (MNI152 template, CBIG, three.js).
 
-There is no account system. The API in `api/` has only a health check so far; the pages do not call it. Workbook notes and best quiz scores are stored in the browser's local storage on the learner's device; notes can be exported as a text file. Nothing is sent to a server. The atlas has Three.js, its data and the fonts embedded in the page, so it works offline; the fonts are embedded too (Manrope, SIL OFL 1.1; monospaced labels use the system font), so the site makes no third-party requests at all.
+There is no account system. The API in `api/` has a health check and the published contract for reviews and the visit counter (see [`.claude/backend/api-contract.md`](.claude/backend/api-contract.md)); the pages do not call it yet. Workbook notes and best quiz scores are stored in the browser's local storage on the learner's device; notes can be exported as a text file. Nothing is sent to a server. The atlas has Three.js, its data and the fonts embedded in the page, so it works offline; the fonts are embedded too (Manrope, SIL OFL 1.1; monospaced labels use the system font), so the site makes no third-party requests at all.
 
 The brain atlas always uses a dark interface and 3D viewport for consistent contrast. The light/dark theme preference changes the homepage, workbook, and quiz, but does not affect the atlas. The language choice (`RU / EN`) is shared between all pages.
 
@@ -42,8 +42,12 @@ pnpm run ci             # typecheck + lint + format check + tests
 
 make install            # Python environment from uv.lock
 make check test coverage-gate
-make run                # API on http://127.0.0.1:8000/api/health
+make run                # API on http://127.0.0.1:8000/api/health, docs at /api/docs
+make openapi            # regenerate the committed OpenAPI schema after an API change
+pnpm api:generate       # regenerate the frontend API types from it
 ```
+
+`pnpm dev` forwards `/api/*` to `make run`, so start both when working on anything that calls the API.
 
 Project rules, architecture and the contribution workflow are in [CLAUDE.md](CLAUDE.md), [CONTRIBUTING.md](CONTRIBUTING.md) and [`.claude/`](.claude).
 
@@ -53,6 +57,6 @@ Exactly the seven files in `public/`, at the site root. `/` and the short forms 
 
 ## Deploy
 
-Import the repository in Vercel with the **Next.js** framework preset (the import screen may suggest FastAPI because of `pyproject.toml`; choose Next.js) and the default build settings. There is no `vercel.json`. Python functions in `api/` are built from the root `pyproject.toml` and `uv.lock`.
+Import the repository in Vercel with the **Next.js** framework preset (the import screen may suggest FastAPI because of `pyproject.toml`; choose Next.js) and the default build settings. There is no `vercel.json`. The one Python function, `api/index.py`, is built from the root `pyproject.toml` and `uv.lock`; `next.config.ts` rewrites every `/api/*` path to it. The interactive API docs are not served on Vercel; `/api/openapi.json` is.
 
 The atlas describes the healthy brain only (anatomy, physiology, neurochemistry) and is not a diagnostic tool. The workbook provides independent practice on concepts relevant to ЕГЭ, GCSE/IGCSE, IB, and AP; it is not an official exam question bank. The external research links are third-party resources. Their content, access requirements, and age suitability are set by their respective publishers; advanced papers should be used with teacher guidance.

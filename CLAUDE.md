@@ -21,7 +21,9 @@ Do not revisit these without an explicit instruction from the user.
 | ------------- | ---------------------------------------------------------------------------------------------------- | ------------------------------------------------------------------------------------------------------------------- |
 | Hosting       | Vercel Hobby                                                                                         | Usage limits: **no per-request SSR.** Every page is statically generated; the root layout sets `dynamic = 'error'`. |
 | Frontend      | Next.js App Router, static                                                                           | Default `next build` output (not `output: 'export'`): rewrites and the Python functions need the Vercel runtime.    |
-| Backend       | FastAPI in the root `api/` folder (Python Vercel Functions), same origin                             | No CORS, no second domain. The package lives in `backend/`; `api/*.py` are thin entrypoints.                        |
+| Backend       | FastAPI in the root `api/` folder (Python Vercel Functions), same origin                             | No CORS, no second domain. One function, `api/index.py`; `next.config.ts` rewrites all of `/api/*` to it.           |
+| API contract  | OpenAPI generated from the Pydantic models, committed as `.claude/backend/openapi.json`              | `make openapi` + `pnpm api:generate` after any API change; CI fails on drift. One error envelope for every error.   |
+| API docs      | `/api/docs` only locally (`make run`), never on Vercel                                               | Swagger UI needs a CDN the CSP blocks; the CSP is not loosened. `/api/openapi.json` is served everywhere.           |
 | Storage       | Upstash Redis is the single store                                                                    | No second database. Anything that needs persistence goes through a Redis port.                                      |
 | Visit counter | HyperLogLog of a hash of IP + User-Agent + a daily salt                                              | The raw IP is never stored or logged. No cookies, ever.                                                             |
 | Abuse control | Cloudflare Turnstile + rate limit on every write                                                     | A write without a verified Turnstile token is rejected before any other work.                                       |
@@ -58,7 +60,7 @@ Do not revisit these without an explicit instruction from the user.
 ├── app/                   Next.js route files only (thin re-exports)
 ├── src/                   Feature-Sliced Design: app, screens, widgets, features, entities, shared
 ├── public/                Published as-is at the site root (exactly seven files)
-├── api/                   Python Vercel Functions: thin entrypoints, `app = create_app()`
+├── api/                   One Python Vercel Function: `api/index.py`, `app = create_app()`
 ├── backend/
 │   ├── src/neuroctivity/  domain / application / infrastructure / transport, main.py
 │   └── tests/
@@ -75,7 +77,8 @@ dependencies into the function. A `pyproject.toml` inside `backend/` would not b
 
 `public/` holds exactly the seven legacy files; anything else in the repository is a 404. The
 short URLs Netlify used to serve (`/index`, `/workbook`, `/kira`, `/mozg-3d-atlas-2`) and `/` are
-Next.js rewrites defined once in `src/shared/config/routes.ts`. Security headers and cache rules
+Next.js rewrites defined once in `src/shared/config/routes.ts`, next to the `/api/*` rewrite to the
+Python function and the dev-only proxy to `make run`. Security headers and cache rules
 are set by `headers()` in `next.config.ts`; every new file in `public/` needs a cache policy (see
 the security headers guide).
 
@@ -89,8 +92,12 @@ pnpm run ci           # typecheck + lint + format check + tests
 
 make install          # Python 3.12 via uv
 make check test coverage-gate
-make run              # FastAPI on http://127.0.0.1:8000/api/health
+make run              # FastAPI on http://127.0.0.1:8000/api/health, docs at /api/docs
+make openapi          # regenerate .claude/backend/openapi.json after an API change
+pnpm api:generate     # regenerate src/shared/api/generated from it
 ```
+
+`pnpm dev` proxies `/api/*` to `make run`, so run both when the site calls the API.
 
 ## Detailed guides
 
@@ -119,6 +126,8 @@ These override any default behaviour.
 
 1. **No comments in source code.** The code and its names carry the meaning. Markdown docs are
    the place for explanation. The legacy HTML in `public/` is exempt: it stays byte-identical.
+   So is the generated `src/shared/api/generated/` (written by `pnpm api:generate`, never by
+   hand, excluded from lint and format).
 2. **TypeScript only.** No `.js`, `.jsx`, `.mjs` or `.cjs` files outside `public/`. A config file
    that a tool can only read as JavaScript is the one exception, and it must be listed in
    `CONTRIBUTING.md` → "What CI checks". Today there is none.
@@ -151,7 +160,7 @@ Before implementing, estimate the size:
   contract) — present current state, proposed solution, affected files and risks, then wait for
   approval.
 
-After implementing, verify: `pnpm run ci` is green, `pnpm build` shows every route as static
+After implementing, verify: `pnpm run ci` is green (it includes `pnpm api:check`), `pnpm build` shows every route as static
 (`○`), `make check test coverage-gate` is green when Python changed, no duplicated logic, and no
 unrelated files were modified. Anything that can only be verified on Vercel is reported as
 unverified, never claimed.
