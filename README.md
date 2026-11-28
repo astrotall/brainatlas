@@ -27,7 +27,7 @@ Attribution: "This product includes FreeSurfer developed by CorTechs Labs, Inc. 
 
 ## Embedding on the homepage
 
-The hero of `index.html` embeds the atlas in an iframe with `?embed=1&mode=p:memory`. In embed mode the atlas hides its interface, keeps the camera still and lets the visitor rotate the model. Custom security headers are not applied at the moment: `_headers` is a Netlify file kept in the repo root for reference and not published; headers move to the Next.js config in BRA-2. If a host blocks the frame, the page detects it and shows `atlas-preview.jpg`, a rendered still of the model, in its place.
+The hero of `index.html` embeds the atlas in an iframe with `?embed=1&mode=p:memory`. In embed mode the atlas hides its interface, keeps the camera still and lets the visitor rotate the model. Security headers and cache rules are set in `next.config.ts`; the Content-Security-Policy allows only same-origin framing (see [`.claude/docs/security-headers.md`](.claude/docs/security-headers.md)). If a host blocks the frame, the page detects it and shows `atlas-preview.jpg`, a rendered still of the model, in its place.
 
 ## Development
 
