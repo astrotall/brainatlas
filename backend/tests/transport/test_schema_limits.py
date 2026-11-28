@@ -55,8 +55,8 @@ def test_publishes_the_list_query_limits() -> None:
     ("path", "method", "statuses"),
     [
         ("/api/health", "get", {200, 500}),
-        ("/api/reviews", "get", {200, 422, 500, 501, 503}),
-        ("/api/reviews", "post", {202, 403, 422, 429, 500, 501, 503}),
+        ("/api/reviews", "get", {200, 422, 500, 503}),
+        ("/api/reviews", "post", {202, 403, 422, 429, 500, 503}),
         ("/api/visit", "post", {204, 429, 500, 501, 503}),
         ("/api/stats", "get", {200, 500, 501, 503}),
     ],

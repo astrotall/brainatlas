@@ -1,3 +1,4 @@
+import logging
 from collections.abc import Mapping, Sequence
 from http import HTTPStatus
 
@@ -8,8 +9,16 @@ from fastapi.routing import iter_route_contexts
 from starlette.exceptions import HTTPException
 from starlette.routing import compile_path
 
+from neuroctivity.application.errors import (
+    DependencyUnavailableError,
+    HumanCheckFailedError,
+    RateLimitedError,
+)
+from neuroctivity.domain.client import InvalidClientAddressError
+from neuroctivity.domain.review import ReviewRuleError
 from neuroctivity.transport.errors import (
     ALLOW_HEADER,
+    RETRY_AFTER_HEADER,
     ErrorCode,
     FieldError,
     FieldReason,
@@ -23,6 +32,8 @@ MAX_FIELD_NAME_LENGTH = 64
 BODY_FIELD = "body"
 METHOD_SEPARATOR = ", "
 
+logger = logging.getLogger(__name__)
+
 REASONS_BY_ERROR_TYPE: Mapping[str, FieldReason] = {
     "missing": FieldReason.MISSING,
     "extra_forbidden": FieldReason.UNKNOWN_FIELD,
@@ -30,6 +41,7 @@ REASONS_BY_ERROR_TYPE: Mapping[str, FieldReason] = {
     "string_too_long": FieldReason.TOO_LONG,
     "too_short": FieldReason.TOO_SHORT,
     "too_long": FieldReason.TOO_LONG,
+    FieldReason.LINKS_NOT_ALLOWED.value: FieldReason.LINKS_NOT_ALLOWED,
 }
 
 
@@ -77,7 +89,37 @@ def handle_not_implemented(_request: Request, _error: Exception) -> JSONResponse
     return error_response(ErrorCode.NOT_IMPLEMENTED)
 
 
+def handle_review_rule(_request: Request, error: Exception) -> JSONResponse:
+    if not isinstance(error, ReviewRuleError):
+        raise error
+    reason = FieldReason(error.violation.value)
+    return error_response(ErrorCode.VALIDATION_FAILED, [field_error(error.field.value, reason)])
+
+
+def handle_human_check_failed(_request: Request, _error: Exception) -> JSONResponse:
+    return error_response(ErrorCode.TURNSTILE_FAILED)
+
+
+def handle_rate_limited(_request: Request, error: Exception) -> JSONResponse:
+    if not isinstance(error, RateLimitedError):
+        raise error
+    return error_response(
+        ErrorCode.RATE_LIMITED, headers={RETRY_AFTER_HEADER: str(error.retry_after_seconds)}
+    )
+
+
+def handle_unavailable(_request: Request, error: Exception) -> JSONResponse:
+    dependency = error.dependency.value if isinstance(error, DependencyUnavailableError) else "client_address"
+    logger.warning("service_unavailable", extra={"dependency": dependency})
+    return error_response(ErrorCode.SERVICE_UNAVAILABLE)
+
+
 def register_error_handlers(app: FastAPI) -> None:
     app.add_exception_handler(RequestValidationError, handle_validation_error)
     app.add_exception_handler(HTTPException, handle_http_error)
     app.add_exception_handler(RouteNotImplementedError, handle_not_implemented)
+    app.add_exception_handler(ReviewRuleError, handle_review_rule)
+    app.add_exception_handler(HumanCheckFailedError, handle_human_check_failed)
+    app.add_exception_handler(RateLimitedError, handle_rate_limited)
+    app.add_exception_handler(DependencyUnavailableError, handle_unavailable)
+    app.add_exception_handler(InvalidClientAddressError, handle_unavailable)

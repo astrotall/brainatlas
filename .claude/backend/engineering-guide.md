@@ -45,17 +45,23 @@ pyproject.toml  uv.lock  .python-version  Makefile    repo root
 Under the Next.js preset, Vercel builds `api/*.py` files as separate functions and routes only
 their exact paths; any other `/api/*` path would get Next's HTML 404. So:
 
-1. `next.config.ts` rewrites `/api` and `/api/:path*` to `/api/index?__path=:path*` (defined once
-   in `src/shared/config/routes.ts` as `API_REWRITES`). Next overrides a client-sent `__path`.
-2. `RestoreForwardedPath` (transport) removes `__path` from the query and, **only when the app
-   sees `/api/index` or `/api/index.py`**, rebuilds the original path from it. If Vercel hands
-   the function the original path instead, the parameter is just dropped. Either way FastAPI
-   routes the real path, so 404 and 405 come from FastAPI in the error envelope.
+1. `next.config.ts` rewrites `/api` and `/api/:__api_path*` to `/api/index?__path=:__api_path*`
+   (defined once in `src/shared/config/routes.ts` as `API_REWRITES`).
+2. `RestoreForwardedPath` (transport) removes **both reserved parameters**, `__path` and
+   `__api_path`, from the query. Only when the app sees `/api/index` or `/api/index.py` does it
+   rebuild the original path, from the **first** `__path`. If Vercel hands the function the
+   original path instead, the parameters are just dropped. Either way FastAPI routes the real
+   path, so 404 and 405 come from FastAPI in the error envelope.
+
+On Vercel a rewrite also appends each named source parameter to the destination query, even one
+the destination already uses (see `api-contract.md` → "Routing"). That is why the source parameter
+has a reserved name the middleware strips, instead of an ordinary one like `path` that the app
+would reject as unknown.
 
 The path the function sees after a rewrite is not documented by Vercel; the middleware works for
 both cases, and the preview curls in the BRA-6 report check it. If the Next rewrite does not reach
 the function on Vercel, the fallback is a `vercel.json` with the same two rewrites (destination
-`/api/index?__path=$1`). It is not added unless needed, because Vercel recommends framework-native
+`/api/index?__path=$1`, which names no source parameter, so nothing extra is appended). It is not added unless needed, because Vercel recommends framework-native
 rewrites for Next.js.
 
 Rejected: one file per path (unknown paths become Next's HTML 404, every file cold-starts
@@ -96,14 +102,17 @@ Telegram or the model provider.
   machine, the visitor-hash rule. Pure: no I/O, no clock reads, no randomness pulled in directly —
   those are passed in. import-linter enforces it.
 - **Application** — orchestrates a use case by calling _ports_ (interfaces it defines): a
-  `ReviewStore`, a `HumanCheck` (Turnstile), a `RateLimiter`, a `Translator`, a `Moderator`
-  notifier, a `VisitCounter`. It does not know which provider implements them.
+  `ReviewStore`, a `HumanCheck` (Turnstile), a `ReplayGuard`, a `RateLimiter`, a
+  `ModerationNotifier`, and later a `Translator` and a `VisitCounter` (`application/ports.py`). It
+  does not know which provider implements them. The clock and the id factory are ports too.
 - **Infrastructure** — the adapters that implement the ports. Swappable without touching the
   core.
 - **Transport** — maps HTTP to use-case calls and back. Owns request validation, the error
   envelope and status codes.
-- **`main.py`** — the composition root. It builds the adapters from configuration and wires them
-  into the use cases on `app.state`; route handlers read them back through dependencies.
+- **`main.py` + `wiring.py`** — the composition root. `wiring.py` builds the adapters from
+  `Settings` and the use cases from the adapters; `main.py` puts them on `app.state`; route
+  handlers read them back through dependencies. Tests pass their own `ReviewEndpoints` to
+  `create_app` instead.
 
 ## SOLID, applied to this service
 
@@ -166,8 +175,13 @@ The system boundary is where trust changes. Validate hard there, trust freely in
 ## Rate limiting and abuse
 
 - Every write (`POST /api/reviews`, `POST /api/visit`) is rate-limited. Over the limit →
-  `429 rate_limited`.
-- The limit key is a hash of the client, never the raw IP.
+  `429 rate_limited` with `Retry-After`.
+- The limit key is `HMAC-SHA256(CLIENT_HASH_SECRET, address group)` (`domain/client.py`), never
+  the raw IP. The address is the last value of `x-vercel-forwarded-for`; see
+  [`api-contract.md`](api-contract.md) → "Rate limits".
+- Turnstile runs before the limiter, so only a visitor who passed the human check spends budget,
+  and each token is claimed once in Redis because Cloudflare's own reuse check is eventually
+  consistent.
 - Limits, windows and TTLs are configuration values, not literals.
 - Prefer failing closed: if the rate limiter or Turnstile cannot answer, the write is refused.
 
@@ -219,18 +233,60 @@ and drops the body, so headers and status are identical.
 - A **malformed** value (for example `API_DOCS_ENABLED=banana`) fails at startup. A **missing**
   provider secret does not stop the app: health and `/api/openapi.json` keep working, and the
   endpoints that need it answer `503 service_unavailable` and log the missing variable names
-  (BRA-6 decision; lands with the providers in Phase 2).
+  (BRA-6 decision).
 - `/api/docs` is served only when `API_DOCS_ENABLED=true` and `VERCEL` is unset. Swagger UI loads
   from a CDN the CSP blocks, and the CSP is not loosened for it.
 
-### Redis client (decided in BRA-6, lands in Phase 2)
+### Environment variables
+
+Names only; `.env.example` lists them, values live in Vercel.
+
+| Variable                                                                       | Required for          | Notes                                                                                                                |
+| ------------------------------------------------------------------------------ | --------------------- | -------------------------------------------------------------------------------------------------------------------- |
+| `UPSTASH_REDIS_REST_URL`, `UPSTASH_REDIS_REST_TOKEN`                           | both review endpoints | from the Upstash database page                                                                                       |
+| `REDIS_KEY_PREFIX`                                                             | both review endpoints | `[a-z0-9][a-z0-9:_-]{0,39}`; e.g. `prod`, `preview`: one free database, separate data                                |
+| `TURNSTILE_SECRET_KEY`                                                         | `POST`                | a Cloudflare test secret is refused when `VERCEL_ENV=production`                                                     |
+| `TURNSTILE_HOSTNAMES`                                                          | optional              | comma list; when set, the token's hostname must be listed. Leave it empty with test keys (they answer `example.com`) |
+| `TURNSTILE_REPLAY_GUARD`                                                       | optional, default on  | `false` only for previews on test keys; refused in production                                                        |
+| `CLIENT_HASH_SECRET`                                                           | `POST`                | at least 32 characters, random; rotating it resets every rate bucket                                                 |
+| `REVIEW_LIMIT_PER_HOUR`, `REVIEW_LIMIT_PER_DAY`, `REVIEW_GLOBAL_LIMIT_PER_DAY` | optional              | defaults 3, 10, 200; each at least 1                                                                                 |
+| `STORAGE_BACKEND`                                                              | optional              | `upstash` (default) or `memory`; `memory` is refused on Vercel                                                       |
+| `CLIENT_IP_SOURCE`                                                             | optional              | `vercel` (default, `x-vercel-forwarded-for`) or `peer` (local only)                                                  |
+| `API_DOCS_ENABLED`                                                             | local only            | never set on Vercel                                                                                                  |
+
+`VERCEL` and `VERCEL_ENV` are read to refuse the unsafe combinations above; they require
+"Automatically expose System Environment Variables" in the Vercel project; check that it is on,
+or the production refusals cannot fire.
+
+### Redis: client, keys and scripts
 
 The official `upstash-redis` client over Upstash's REST API: one HTTPS request per call, no
-connection pool to leak between invocations. It is configured with its own retries and telemetry
-off and an explicit timeout (its default is none). Every multi-step operation is a single Lua
-script, so counters never exist without a TTL. Upstash error text is never logged or returned.
-`upstash_redis` joins the forbidden lists of the domain and application contracts when it is
-added.
+connection pool to leak between invocations. Retries and telemetry are off and every call is cut
+off after 2 s (`BoundedScriptRunner`; the client itself has no timeout). Only the listed
+transport, decoding and Upstash errors become `503`; their text is never logged or returned, only
+the exception type. A programming error is not disguised as an outage.
+
+Every operation is **one Lua script** (`infrastructure/redis_scripts.py`), so it is atomic and
+costs one command against the free tier's monthly budget:
+
+| Key (after `REDIS_KEY_PREFIX:`)       | Type   | Content                                                                               |
+| ------------------------------------- | ------ | ------------------------------------------------------------------------------------- |
+| `review:{uuid}`                       | hash   | `rating`, `text`, `lang`, `status`, `created_at` (ms), `translation_ru`/`_en` (BRA-7) |
+| `reviews:pending`, `reviews:approved` | zset   | review ids scored by `created_at`; BRA-7 moves an id from one to the other            |
+| `rl:{hour,day}:{client}:{n}`          | string | per-client counter for window number `n`, TTL one window                              |
+| `rl:global:global:{n}`                | string | all-clients daily counter                                                             |
+| `turnstile:{sha256(token)}`           | string | single-use claim, TTL 300 s                                                           |
+
+- `create_review` refuses to overwrite an existing id. `list_approved` reads the newest ids from
+  the approved index and their hashes in one call.
+- `acquire_windows` checks every window first and increments only if all have room, so a refused
+  attempt changes nothing. After `INCR` it sets the TTL whenever the key has none, which also
+  repairs a key left without one.
+- Everything read back is untrusted: a record with a bad id, rating, language, status, length or
+  timestamp is skipped and logged as `review_record_skipped`; an answer of the wrong shape is
+  `503`.
+- The in-memory adapters (`infrastructure/memory.py`) implement the same ports with the same
+  semantics and run through the same contract tests; they serve `make run` and the unit tests.
 
 - No magic numbers: timeouts, limits, TTLs and text bounds are named values.
 
