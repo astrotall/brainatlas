@@ -5,7 +5,7 @@ import pytest
 from fastapi.testclient import TestClient
 
 from neuroctivity.transport.middleware import MAX_BODY_BYTES
-from tests.transport.openapi import assert_documented, assert_error, field_reasons
+from tests.transport.openapi import assert_documented, field_reasons
 
 URL = "/api/reviews"
 JSON_HEADERS = {"Content-Type": "application/json"}
@@ -20,7 +20,9 @@ def submit(client: TestClient, **changes: object) -> list[tuple[str, str]]:
 
 def assert_accepted_by_validation(client: TestClient, **changes: object) -> None:
     response = client.post(URL, json={**VALID, **changes})
-    assert_error(response, HTTPStatus.NOT_IMPLEMENTED, "not_implemented")
+    assert response.status_code == HTTPStatus.ACCEPTED, response.text
+    assert response.json() == {"status": "pending"}
+    assert response.headers["cache-control"] == "no-store"
     assert_documented(response, URL, "post")
 
 
@@ -124,7 +126,7 @@ def test_never_echoes_the_submitted_values_in_a_validation_error(client: TestCli
 def test_accepts_the_json_content_types_a_browser_may_send(client: TestClient, content_type: str) -> None:
     response = client.post(URL, content=json.dumps(VALID), headers={"Content-Type": content_type})
 
-    assert response.status_code == HTTPStatus.NOT_IMPLEMENTED
+    assert response.status_code == HTTPStatus.ACCEPTED, response.text
 
 
 @pytest.mark.parametrize(
@@ -189,7 +191,7 @@ def body_of_size(size: int) -> bytes:
 def test_accepts_a_body_of_exactly_the_size_limit(client: TestClient) -> None:
     response = client.post(URL, content=body_of_size(MAX_BODY_BYTES), headers=JSON_HEADERS)
 
-    assert response.status_code == HTTPStatus.NOT_IMPLEMENTED
+    assert response.status_code == HTTPStatus.ACCEPTED, response.text
 
 
 @pytest.mark.parametrize("size", [MAX_BODY_BYTES + 1, MAX_BODY_BYTES * 64])
@@ -203,7 +205,7 @@ def test_rejects_a_body_over_the_size_limit(client: TestClient, size: int) -> No
 def test_does_not_depend_on_the_origin_header(client: TestClient, origin: str) -> None:
     response = client.post(URL, json=VALID, headers={"Origin": origin})
 
-    assert response.status_code == HTTPStatus.NOT_IMPLEMENTED
+    assert response.status_code == HTTPStatus.ACCEPTED, response.text
     assert "access-control-allow-origin" not in response.headers
 
 
@@ -213,7 +215,9 @@ def test_does_not_depend_on_the_origin_header(client: TestClient, origin: str) -
 def test_accepts_a_documented_list_query(client: TestClient, query: str) -> None:
     response = client.get(f"{URL}?{query}")
 
-    assert_error(response, HTTPStatus.NOT_IMPLEMENTED, "not_implemented")
+    assert response.status_code == HTTPStatus.OK, response.text
+    assert response.json() == {"items": []}
+    assert response.headers["cache-control"] == "public, s-maxage=60, stale-while-revalidate=300"
     assert_documented(response, URL, "get")
 
 

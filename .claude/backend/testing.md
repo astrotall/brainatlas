@@ -39,6 +39,20 @@ body validates against the declared schema; `assert_error` checks the envelope, 
 `reason`, never on `message`. A test that freezes the schema itself checks the published limits
 (`minimum`, `maxLength`, `enum`), because the frontend reads them from there.
 
+Adapters are exercised in two ways. The Lua scripts run in `fakeredis` (with `lupa`), and the
+Redis adapters and the in-memory adapters share **one contract suite**
+(`tests/infrastructure/test_storage_contract.py`, parametrized over both), so a fake can never
+drift from the real thing. The Turnstile adapter runs against `httpx.MockTransport`. The only test
+that talks to a real provider is `tests/integration/test_upstash_live.py`, marked `integration`,
+deselected by default and skipped unless `UPSTASH_REDIS_REST_URL` and `UPSTASH_REDIS_REST_TOKEN`
+are set; run it with `make test-integration` against a non-production database. It writes under a
+random prefix and deletes its keys.
+
+Shared helpers: `tests/fakes.py` (`Harness` wires the use cases to in-memory adapters with a fixed
+clock, sequential ids and a stub human check), `tests/logs.py` (`logged_text` includes the
+`extra` fields, which `caplog.text` does not, so privacy assertions see everything that was
+logged).
+
 The bulk of the suite is domain + application. Adapters get a thin integration layer, not
 exhaustive coverage — you are not testing the provider's SDK.
 
@@ -66,6 +80,9 @@ This is the checklist. These are the cases worth writing; the happy path is assu
   unhandled exception all answer the envelope.
 - The forwarded path: `/api/index?__path=…` routes as the original path with the original query;
   a `__path` reaching any other path is dropped; a forwarded path with no route is `404`.
+- Vercel's extra parameter: every forwarded test also runs with `__api_path` on the query, as
+  Vercel appends it (once, or once per segment for a nested path). A client-sent `path` is still
+  `422 unknown_field`; a client-sent `__path` after the rewrite's own never changes the route.
 - The local proxy exists only for `next dev` with `NODE_ENV=development`; every other phase and
   `NODE_ENV` pair yields the deployed rewrites and identical headers (`api-rewrites.test.ts`).
 

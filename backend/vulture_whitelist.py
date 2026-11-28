@@ -1,10 +1,11 @@
-from neuroctivity.domain.review import Language
+from neuroctivity.domain.review import Language, ReviewStatus
 from neuroctivity.transport.errors import FieldError
 from neuroctivity.transport.reviews import CreateReviewRequest, Review, ReviewListQuery
 from neuroctivity.transport.visits import VisitStats
 
 Language.RU
 Language.EN
+ReviewStatus.REJECTED
 
 FieldError.field
 

@@ -36,17 +36,17 @@ Do not revisit these without an explicit instruction from the user.
 
 ## Stack
 
-| Concern         | Tool                                                                        |
-| --------------- | --------------------------------------------------------------------------- |
-| Package manager | pnpm (version pinned in `package.json` → `packageManager`)                  |
-| Framework       | Next.js App Router, React, Server Components by default                     |
-| Language        | TypeScript, `strict: true`. Never JavaScript.                               |
-| Styling         | Tailwind CSS v4 (tokens arrive with BRA-3)                                  |
-| Server state    | TanStack Query (arrives with BRA-9)                                         |
-| Client state    | Zustand (arrives with BRA-3)                                                |
-| i18n            | chosen in BRA-3; `ru` + `en`                                                |
-| Tests           | Vitest                                                                      |
-| Backend         | Python 3.12, FastAPI, uv (locked), ruff, mypy strict, import-linter, pytest |
+| Concern         | Tool                                                                                                                            |
+| --------------- | ------------------------------------------------------------------------------------------------------------------------------- |
+| Package manager | pnpm (version pinned in `package.json` → `packageManager`)                                                                      |
+| Framework       | Next.js App Router, React, Server Components by default                                                                         |
+| Language        | TypeScript, `strict: true`. Never JavaScript.                                                                                   |
+| Styling         | Tailwind CSS v4 (tokens arrive with BRA-3)                                                                                      |
+| Server state    | TanStack Query (arrives with BRA-9)                                                                                             |
+| Client state    | Zustand (arrives with BRA-3)                                                                                                    |
+| i18n            | chosen in BRA-3; `ru` + `en`                                                                                                    |
+| Tests           | Vitest                                                                                                                          |
+| Backend         | Python 3.12, FastAPI, pydantic-settings, upstash-redis, httpx, uv (locked), ruff, mypy strict, import-linter, pytest, fakeredis |
 
 ## Repository layout
 
@@ -117,7 +117,7 @@ suggestions.
   adapters, SOLID, boundaries, privacy, moderation, CI gate
 - [`.claude/backend/testing.md`](.claude/backend/testing.md) — what to test, boundary checklist,
   untrusted model output
-- [`.claude/backend/api-contract.md`](.claude/backend/api-contract.md) — endpoints (planned)
+- [`.claude/backend/api-contract.md`](.claude/backend/api-contract.md) — endpoints, limits, error codes, routing
 - [`CONTRIBUTING.md`](CONTRIBUTING.md) — branches, commits, PRs, Jira, hooks, CI
 
 ## Hard rules

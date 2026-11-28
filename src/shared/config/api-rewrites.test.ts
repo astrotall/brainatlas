@@ -11,6 +11,7 @@ import {
   API_FORWARDED_PATH_PARAM,
   API_FUNCTION_PATH,
   API_PREFIX,
+  API_REWRITE_PARAM,
   API_REWRITES,
   LEGACY_REWRITES,
   LOCAL_API_ORIGIN,
@@ -99,8 +100,33 @@ describe('deployed API routing', () => {
 
     expect(source).toContain(`API_PREFIX = "${API_PREFIX}"`);
     expect(source).toContain(`FORWARDED_PATH_PARAM = "${API_FORWARDED_PATH_PARAM}"`);
+    expect(source).toContain(`REWRITE_PARAM = "${API_REWRITE_PARAM}"`);
     expect(source).toContain(`"${API_FUNCTION_PATH}"`);
   });
+});
+
+describe('rewrite parameter names', () => {
+  it('names the catch-all parameter with a reserved name, never one the API accepts', () => {
+    const catchAll = API_REWRITES.find(({ source }) => source.includes(':'));
+
+    expect(catchAll?.source).toBe(`${API_PREFIX}/:${API_REWRITE_PARAM}*`);
+    expect(API_REWRITE_PARAM).toMatch(/^__/);
+    expect(API_REWRITE_PARAM).not.toBe(API_FORWARDED_PATH_PARAM);
+  });
+
+  it.each(API_REWRITES)(
+    'leaks no parameter of $source except the two the API strips',
+    ({ source, destination }) => {
+      const sourceNames = [...source.matchAll(/:(\w+)/g)].map(([, name]) => name);
+      const queryNames = [...new URL(destination, BASE_URL).searchParams.keys()];
+
+      expect(
+        [...sourceNames, ...queryNames].filter(
+          (name) => name !== API_REWRITE_PARAM && name !== API_FORWARDED_PATH_PARAM,
+        ),
+      ).toEqual([]);
+    },
+  );
 });
 
 describe('local API proxy', () => {

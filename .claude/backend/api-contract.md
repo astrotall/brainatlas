@@ -26,15 +26,15 @@ There is no hand-written schema. There is no CORS: the API is same-origin (`/api
 
 ## Endpoints
 
-| Method | Path                | Status      | Ticket | Success                                    | Errors                       |
-| ------ | ------------------- | ----------- | ------ | ------------------------------------------ | ---------------------------- |
-| `GET`  | `/api/health`       | implemented | BRA-1  | `200 {"status": "ok"}`                     | 405, 500                     |
-| `GET`  | `/api/reviews`      | planned     | BRA-6  | `200 ReviewList`                           | 422, 501, 503, 500           |
-| `POST` | `/api/reviews`      | planned     | BRA-6  | `202 {"status": "pending"}`                | 403, 422, 429, 501, 503, 500 |
-| `POST` | `/api/visit`        | planned     | BRA-8  | `204`, no body                             | 429, 501, 503, 500           |
-| `GET`  | `/api/stats`        | planned     | BRA-8  | `200 {"today": n, "total": n}`             | 501, 503, 500                |
-| `GET`  | `/api/openapi.json` | implemented | BRA-6  | the schema                                 | 405                          |
-| `POST` | (webhook)           | planned     | BRA-7  | Telegram moderation; not in the schema yet | —                            |
+| Method | Path                | Status      | Ticket | Success                                    | Errors                  |
+| ------ | ------------------- | ----------- | ------ | ------------------------------------------ | ----------------------- |
+| `GET`  | `/api/health`       | implemented | BRA-1  | `200 {"status": "ok"}`                     | 405, 500                |
+| `GET`  | `/api/reviews`      | implemented | BRA-6  | `200 ReviewList`                           | 422, 503, 500           |
+| `POST` | `/api/reviews`      | implemented | BRA-6  | `202 {"status": "pending"}`                | 403, 422, 429, 503, 500 |
+| `POST` | `/api/visit`        | planned     | BRA-8  | `204`, no body                             | 429, 501, 503, 500      |
+| `GET`  | `/api/stats`        | planned     | BRA-8  | `200 {"today": n, "total": n}`             | 501, 503, 500           |
+| `GET`  | `/api/openapi.json` | implemented | BRA-6  | the schema                                 | 405                     |
+| `POST` | (webhook)           | planned     | BRA-7  | Telegram moderation; not in the schema yet | —                       |
 
 Every `GET` also answers `HEAD` with the same status and headers and an empty body. Any other
 path under `/api` is `404 not_found`; a known path with the wrong method is
@@ -97,15 +97,73 @@ cache.
   before it is parsed.
 - Unknown fields are rejected (`reason: "unknown_field"`).
 - Length is counted in code points: `[...text].length` in JavaScript, not `text.length`. An emoji
-  outside the BMP counts as one.
-- Normalization today (Phase 1) trims leading and trailing whitespace. Phase 2 adds: NFC, removal
-  of zero-width and control characters (emoji joiners are kept), and the no-links rule
-  (`reason: "links_not_allowed"`). Limits apply after normalization; the stored text is the
-  normalized text.
+  outside the BMP counts as one. The limits apply **after normalization**, and the stored text is
+  the normalized text:
+  1. line breaks become `\n`; tab, vertical tab and form feed become a space;
+  2. control, invisible format (zero-width space, bidi overrides, BOM, soft hyphen, tag
+     characters), surrogate and private-use characters are removed;
+  3. NFC; at most 4 combining marks in a row are kept;
+  4. a zero-width joiner survives only between two visible characters (emoji sequences such as
+     👩‍🔬 stay intact);
+  5. more than one blank line in a row becomes one blank line;
+  6. leading and trailing whitespace is trimmed.
+
+  NFKC is **not** applied to the stored text (it would turn `№` into `No` and `10²` into `102`);
+  it is used only inside the link check. The form should show the same counter, but the server is
+  the authority: a text that looks long enough can still be `too_short` after normalization.
+
+- **No links** (`reason: "links_not_allowed"`): any `scheme://`, `mailto:`, `javascript:`,
+  `data:type/`, `tel:+digits`, `www.`, `t.me/` and other messenger links, e-mail addresses, and
+  bare domains with a known suffix (`example.com`, `пример.рф`, `site.io`), including fullwidth
+  dots, `(dot)` / `[.]` spellings and Cyrillic look-alike letters. Suffixes that are also ordinary
+  words (`.it`, `.so`, `.me`, `.live`, `.сайт` …) count only in lowercase, so `good.It helped`,
+  `т.е.`, `e.g.`, `Node.js`, `г.Москва` and `3.5` are fine. Moderation remains the real gate;
+  `example . com` with spaces is not caught.
 - Success is `202 {"status": "pending"}`. The review is not visible until a moderator approves it
   (BRA-7).
-- The checks run cheapest first: size and content type, schema, text rules, then Turnstile, then
-  the rate limit. Invalid input never reaches Turnstile or Redis.
+- The checks run cheapest first: size and content type, schema and text rules, client address,
+  Turnstile, the single-use token claim, then the rate limit, then the write. Invalid input never
+  reaches Cloudflare or Redis, and a failed human check never spends the rate budget.
+
+### Turnstile
+
+| Cloudflare answer                                                                   | API                       |
+| ----------------------------------------------------------------------------------- | ------------------------- |
+| `success: true` (and, when `TURNSTILE_HOSTNAMES` is set, a listed host)             | continues                 |
+| `invalid-input-response`, `timeout-or-duplicate`, `missing-input-response`, no code | `403 turnstile_failed`    |
+| a token already used here (claimed in Redis for 300 s)                              | `403 turnstile_failed`    |
+| `success: true` for an unlisted host                                                | `403 turnstile_failed`    |
+| `invalid-input-secret`, `internal-error`, `bad-request`, any unknown code           | `503 service_unavailable` |
+| timeout (3 s), network error, non-200, malformed JSON                               | `503 service_unavailable` |
+
+Only the secret and the token are sent; the visitor's IP is not. Cloudflare's own reuse detection
+is eventually consistent, so the API also claims each token (its SHA-256) once in Redis: two
+concurrent posts with one token store one review. Cloudflare's always-pass test secret accepts
+**any** token, not only the dummy one, so test keys must never reach production (the API refuses
+them there).
+
+### Rate limits
+
+| Window                 | Default | Variable                      |
+| ---------------------- | ------- | ----------------------------- |
+| per client, clock hour | 3       | `REVIEW_LIMIT_PER_HOUR`       |
+| per client, UTC day    | 10      | `REVIEW_LIMIT_PER_DAY`        |
+| all clients, UTC day   | 200     | `REVIEW_GLOBAL_LIMIT_PER_DAY` |
+
+Fixed windows. Over any of them is `429 rate_limited` with `Retry-After` set to the seconds until
+that window ends. A refused attempt consumes nothing, so a blocked client cannot drain the global
+cap. The client is `HMAC-SHA256(CLIENT_HASH_SECRET, address)`, where the address is the **last**
+value of `x-vercel-forwarded-for` (set by Vercel and not overwritten by a proxy in front of it;
+`x-forwarded-for` and `x-real-ip` are not trusted), IPv6 grouped by its /64, IPv4-mapped IPv6
+read as IPv4. A missing or unparsable address is `503`. The raw address is never stored or logged.
+One school network shares one IPv4 address and therefore one budget.
+
+### Failure behaviour
+
+- Redis unreachable, slow (2 s) or answering something unexpected: `POST` and `GET` are `503`
+  (fail closed). A failure after the rate limit was taken leaves that attempt counted.
+- Missing configuration: the endpoints that need it are `503`, `/api/health` and
+  `/api/openapi.json` keep working, and the missing variable names are logged at startup.
 - **No check uses the `Origin` header.** The site sends `Referrer-Policy: no-referrer`, so a
   same-origin `POST` carries `Origin: null`.
 
@@ -142,7 +200,7 @@ whole, or the unknown key itself, truncated to 64 characters).
 | `not_found`           | 404    | no route at this path                                           |
 | `method_not_allowed`  | 405    | the path exists, the method does not; `Allow` lists the methods |
 | `service_unavailable` | 503    | Redis or Cloudflare cannot answer, or configuration is missing  |
-| `not_implemented`     | 501    | a planned endpoint before its ticket lands                      |
+| `not_implemented`     | 501    | a planned endpoint (`/api/visit`, `/api/stats`) before BRA-8    |
 | `internal`            | 500    | anything unexpected                                             |
 
 | Field `reason`      | Meaning                                     |
@@ -151,7 +209,7 @@ whole, or the unknown key itself, truncated to 64 characters).
 | `invalid`           | wrong type, value outside the enum or range |
 | `too_short`         | below the minimum length                    |
 | `too_long`          | above the maximum length                    |
-| `links_not_allowed` | the text contains a link (Phase 2)          |
+| `links_not_allowed` | the text contains a link                    |
 | `unknown_field`     | a field the contract does not declare       |
 
 - The client maps `code` and `reason` to translated messages and **never renders `message`**,
@@ -161,14 +219,40 @@ whole, or the unknown key itself, truncated to 64 characters).
 
 ## Headers and caching
 
-| Response                           | `Cache-Control`                                   |
-| ---------------------------------- | ------------------------------------------------- |
-| `GET /api/reviews` `200` (Phase 2) | `public, s-maxage=60, stale-while-revalidate=300` |
-| everything else, every error       | `no-store`                                        |
+| Response                     | `Cache-Control`                                   |
+| ---------------------------- | ------------------------------------------------- |
+| `GET /api/reviews` `200`     | `public, s-maxage=60, stale-while-revalidate=300` |
+| everything else, every error | `no-store`                                        |
 
 Every API response also carries `X-Content-Type-Options: nosniff`, and the site-wide security
 headers from `next.config.ts` apply to `/api/*` like any other path. The CSP is not loosened for
 the API.
+
+## Routing
+
+All of `/api/*` reaches one Python function, `api/index.py`, through two rewrites in
+`next.config.ts` (`src/shared/config/routes.ts` → `API_REWRITES`):
+
+| Request             | Rewritten to                     |
+| ------------------- | -------------------------------- |
+| `/api`              | `/api/index?__path=`             |
+| `/api/:__api_path*` | `/api/index?__path=:__api_path*` |
+
+The app's `RestoreForwardedPath` middleware strips the two **reserved** query parameters, `__path`
+and `__api_path`, and when the function sees `/api/index` it routes the path given by the first
+`__path`. Clients never send either; a client-sent `__path` cannot change the route, and a
+client-sent `__api_path` is discarded.
+
+**Finding from the first deploy.** Vercel appends every named parameter of a rewrite's source to
+the destination query, even when the destination already uses it. With the source written as
+`/api/:path*`, `GET /api/reviews?lang=ru` reached the function as
+`/api/index?__path=reviews&path=reviews&lang=ru` (visible in `x-nextjs-rewritten-query`), and the
+app rejected `path` as an unknown parameter (`422`). Local `next start` and Next's config test
+helpers do not append it, which is why the local suite missed it. The source parameter is
+therefore named `__api_path`, a reserved name the middleware strips. Every other parameter name
+keeps its normal meaning: `GET /api/reviews?lang=ru&path=x` is still `422 unknown_field` on
+`path`. The backend tests replay Vercel's query shape, and a Vitest guard fails if a rewrite
+introduces any parameter name other than the two reserved ones.
 
 ## Interactive docs
 
@@ -179,7 +263,11 @@ sets, and it is refused whenever `VERCEL` is set, whatever the flag says. Locall
 
 ## Local development
 
-`make run` serves the API on `http://127.0.0.1:8000`. Under `pnpm dev` (and only there:
+`make run` serves the API on `http://127.0.0.1:8000` with the in-memory store
+(`STORAGE_BACKEND=memory`), the socket address as the client (`CLIENT_IP_SOURCE=peer`),
+Cloudflare's always-pass test secret, the replay guard off and a fresh random
+`CLIENT_HASH_SECRET` per run; each can be overridden from the shell. Use the test site key
+`1x00000000000000000000AA` in the widget; it yields `XXXX.DUMMY.TOKEN.XXXX`. Under `pnpm dev` (and only there:
 `next dev` with `NODE_ENV=development`), Next proxies `/api/*` to that address, so the site calls
 `/api/...` same-origin exactly as it will in production. Without `make run`, those calls fail.
 

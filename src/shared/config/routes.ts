@@ -29,16 +29,20 @@ export const API_FUNCTION_PATH = `${API_PREFIX}/index`;
 
 export const API_FORWARDED_PATH_PARAM = '__path';
 
+export const API_REWRITE_PARAM = '__api_path';
+
 export const LOCAL_API_ORIGIN = 'http://127.0.0.1:8000';
 
 const API_ANY_PATH = `${API_PREFIX}/:path*`;
+
+const API_REWRITE_SOURCE = `${API_PREFIX}/:${API_REWRITE_PARAM}*`;
 
 const toApiFunction = (forwardedPath: string): string =>
   `${API_FUNCTION_PATH}?${API_FORWARDED_PATH_PARAM}=${forwardedPath}`;
 
 export const API_REWRITES: readonly Rewrite[] = [
   { source: API_PREFIX, destination: toApiFunction('') },
-  { source: API_ANY_PATH, destination: toApiFunction(':path*') },
+  { source: API_REWRITE_SOURCE, destination: toApiFunction(`:${API_REWRITE_PARAM}*`) },
 ];
 
 export const LOCAL_API_REWRITES: readonly Rewrite[] = [

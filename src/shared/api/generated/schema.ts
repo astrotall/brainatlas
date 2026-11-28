@@ -79,12 +79,13 @@ export interface components {
     schemas: {
         /** CreateReviewRequest */
         CreateReviewRequest: {
+            /** @description Declared language of the text: the UI language at submit time */
             lang: components["schemas"]["Language"];
             /** Rating */
             rating: number;
             /**
              * Text
-             * @description Length is counted in Unicode code points after trimming
+             * @description Counted in Unicode code points after normalization: trimmed, NFC, control and invisible format characters removed (the emoji joiner is kept). Links are rejected.
              */
             text: string;
             /** Turnstiletoken */
@@ -264,15 +265,6 @@ export interface operations {
                     "application/json": components["schemas"]["ErrorResponse"];
                 };
             };
-            /** @description not_implemented */
-            501: {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content: {
-                    "application/json": components["schemas"]["ErrorResponse"];
-                };
-            };
             /** @description service_unavailable */
             503: {
                 headers: {
@@ -337,15 +329,6 @@ export interface operations {
             };
             /** @description internal */
             500: {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content: {
-                    "application/json": components["schemas"]["ErrorResponse"];
-                };
-            };
-            /** @description not_implemented */
-            501: {
                 headers: {
                     [name: string]: unknown;
                 };

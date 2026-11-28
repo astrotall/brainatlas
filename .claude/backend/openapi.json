@@ -5,7 +5,8 @@
         "additionalProperties": false,
         "properties": {
           "lang": {
-            "$ref": "#/components/schemas/Language"
+            "$ref": "#/components/schemas/Language",
+            "description": "Declared language of the text: the UI language at submit time"
           },
           "rating": {
             "maximum": 5.0,
@@ -14,7 +15,7 @@
             "type": "integer"
           },
           "text": {
-            "description": "Length is counted in Unicode code points after trimming",
+            "description": "Counted in Unicode code points after normalization: trimmed, NFC, control and invisible format characters removed (the emoji joiner is kept). Links are rejected.",
             "maxLength": 1000,
             "minLength": 10,
             "title": "Text",
@@ -346,16 +347,6 @@
             },
             "description": "internal"
           },
-          "501": {
-            "content": {
-              "application/json": {
-                "schema": {
-                  "$ref": "#/components/schemas/ErrorResponse"
-                }
-              }
-            },
-            "description": "not_implemented"
-          },
           "503": {
             "content": {
               "application/json": {
@@ -369,8 +360,7 @@
         },
         "summary": "List Reviews",
         "tags": [
-          "reviews",
-          "planned"
+          "reviews"
         ]
       },
       "post": {
@@ -445,16 +435,6 @@
             },
             "description": "internal"
           },
-          "501": {
-            "content": {
-              "application/json": {
-                "schema": {
-                  "$ref": "#/components/schemas/ErrorResponse"
-                }
-              }
-            },
-            "description": "not_implemented"
-          },
           "503": {
             "content": {
               "application/json": {
@@ -468,8 +448,7 @@
         },
         "summary": "Create Review",
         "tags": [
-          "reviews",
-          "planned"
+          "reviews"
         ]
       }
     },

@@ -109,7 +109,7 @@ def test_head_answers_like_get_without_a_body(client: TestClient, url: str) -> N
     assert head.status_code == get.status_code
     assert head.content == b""
     assert head.headers["content-length"] == str(len(get.content))
-    assert head.headers["cache-control"] == "no-store"
+    assert head.headers["cache-control"] == get.headers["cache-control"]
     assert head.headers["x-content-type-options"] == "nosniff"
 
 

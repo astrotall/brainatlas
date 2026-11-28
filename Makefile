@@ -1,7 +1,8 @@
-.PHONY: install check guard openapi openapi-check fix test coverage-gate audit run
+.PHONY: install check guard openapi openapi-check fix test test-integration coverage-gate audit run
 
 PYTHON_PATHS = backend/src backend/tests api
 OPENAPI_SCHEMA = .claude/backend/openapi.json
+TURNSTILE_TEST_SECRET = 1x0000000000000000000000000000000AA
 
 install:
 	uv sync --locked
@@ -31,6 +32,9 @@ test:
 	uv run coverage erase
 	uv run pytest --cov --cov-report=
 
+test-integration:
+	uv run pytest -m integration -p no:cacheprovider
+
 coverage-gate:
 	uv run coverage report --fail-under=95
 	uv run coverage report --format=total --include='backend/src/neuroctivity/domain/*,backend/src/neuroctivity/application/*' --fail-under=98
@@ -43,4 +47,10 @@ audit:
 		status=$$?; rm -f $$requirements; exit $$status
 
 run:
-	API_DOCS_ENABLED=true uv run uvicorn neuroctivity.main:create_app --factory --reload
+	API_DOCS_ENABLED=true \
+	STORAGE_BACKEND=$${STORAGE_BACKEND:-memory} \
+	CLIENT_IP_SOURCE=$${CLIENT_IP_SOURCE:-peer} \
+	TURNSTILE_SECRET_KEY=$${TURNSTILE_SECRET_KEY:-$(TURNSTILE_TEST_SECRET)} \
+	TURNSTILE_REPLAY_GUARD=$${TURNSTILE_REPLAY_GUARD:-false} \
+	CLIENT_HASH_SECRET=$${CLIENT_HASH_SECRET:-$$(uv run python -c 'import secrets; print(secrets.token_hex(32))')} \
+	uv run uvicorn neuroctivity.main:create_app --factory --reload

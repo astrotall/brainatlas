@@ -4,6 +4,8 @@ from starlette.types import ASGIApp, Receive, Scope, Send
 
 API_PREFIX = "/api"
 FORWARDED_PATH_PARAM = "__path"
+REWRITE_PARAM = "__api_path"
+RESERVED_PARAMS = frozenset({FORWARDED_PATH_PARAM, REWRITE_PARAM})
 FUNCTION_PATHS = frozenset({"/api/index", "/api/index.py"})
 QUERY_SEPARATOR = b"&"
 QUERY_ENCODING = "latin-1"
@@ -13,11 +15,12 @@ def split_forwarded_path(query: bytes) -> tuple[str | None, bytes]:
     forwarded: str | None = None
     kept: list[bytes] = []
     for segment in query.split(QUERY_SEPARATOR):
-        name, _, value = segment.partition(b"=")
-        if unquote(name.decode(QUERY_ENCODING)) == FORWARDED_PATH_PARAM:
-            forwarded = unquote(value.decode(QUERY_ENCODING))
-        else:
+        raw_name, _, raw_value = segment.partition(b"=")
+        name = unquote(raw_name.decode(QUERY_ENCODING))
+        if name not in RESERVED_PARAMS:
             kept.append(segment)
+        elif name == FORWARDED_PATH_PARAM and forwarded is None:
+            forwarded = unquote(raw_value.decode(QUERY_ENCODING))
     return forwarded, QUERY_SEPARATOR.join(kept)
 
 
