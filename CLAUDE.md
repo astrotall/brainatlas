@@ -75,8 +75,9 @@ dependencies into the function. A `pyproject.toml` inside `backend/` would not b
 
 `public/` holds exactly the seven legacy files; anything else in the repository is a 404. The
 short URLs Netlify used to serve (`/index`, `/workbook`, `/kira`, `/mozg-3d-atlas-2`) and `/` are
-Next.js rewrites defined once in `src/shared/config/routes.ts`. `_headers` is a Netlify file kept
-in the root for BRA-2 and is not published.
+Next.js rewrites defined once in `src/shared/config/routes.ts`. Security headers and cache rules
+are set by `headers()` in `next.config.ts`; every new file in `public/` needs a cache policy (see
+the security headers guide).
 
 ## Running
 
@@ -103,6 +104,8 @@ suggestions.
 - [`.claude/docs/state-management.md`](.claude/docs/state-management.md) — TanStack Query vs
   Zustand vs localStorage, hydration, theme flash
 - [`.claude/docs/i18n.md`](.claude/docs/i18n.md) — locales, keys, plurals, formatting
+- [`.claude/docs/security-headers.md`](.claude/docs/security-headers.md) — CSP, HSTS,
+  Permissions-Policy, cache rules, adding a file to `public/`
 - [`.claude/backend/engineering-guide.md`](.claude/backend/engineering-guide.md) — ports and
   adapters, SOLID, boundaries, privacy, moderation, CI gate
 - [`.claude/backend/testing.md`](.claude/backend/testing.md) — what to test, boundary checklist,

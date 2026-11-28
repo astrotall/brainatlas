@@ -1,3 +1,4 @@
+import { PHASE_PRODUCTION_BUILD } from 'next/constants';
 import { describe, expect, it } from 'vitest';
 import nextConfig from '../../../next.config';
 import { PUBLIC_FILE, PUBLIC_FILES, toPublicPath } from './public-files';
@@ -41,7 +42,7 @@ const UNSERVED_URLS: readonly string[] = [
 ];
 
 const loadRewrites = async (): Promise<readonly LegacyRewrite[]> => {
-  const rewrites = await nextConfig.rewrites?.();
+  const rewrites = await nextConfig(PHASE_PRODUCTION_BUILD).rewrites?.();
 
   if (!Array.isArray(rewrites)) {
     throw new TypeError('next.config.ts must return a flat rewrite list');

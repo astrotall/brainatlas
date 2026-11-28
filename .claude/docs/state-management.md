@@ -44,9 +44,10 @@ The keys are fixed by the legacy pages, and existing visitors already have value
 
 The HTML is generated at build time, so the server cannot know a visitor's theme or language.
 
-- **Theme:** a small inline script in the root layout's `<head>` reads `neuroctivity-theme`
-  before first paint and sets the class that `dark:` keys on. Without it the page paints light and
-  then switches. The `<html>` element gets `suppressHydrationWarning` for that one attribute only.
+- **Theme:** a small static script file loaded in the root layout's `<head>` reads
+  `neuroctivity-theme` before first paint and sets the class that `dark:` keys on. Without it the
+  page paints light and then switches. It is not inline (see `security-headers.md`). The `<html>`
+  element gets `suppressHydrationWarning` for that one attribute only.
 - **Language:** the static HTML is rendered in the default locale. A client leaf reads
   `conn_lang` after hydration and switches. Never read `localStorage` during render — the server
   output and the first client render must match.
