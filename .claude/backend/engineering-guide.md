@@ -19,26 +19,47 @@ requirement, not a feature.
 ## Layout and deployment
 
 ```
-api/health.py                      thin Vercel entrypoint: app = create_app()
+api/index.py                       the one Vercel Function: app = create_app()
 backend/src/neuroctivity/
   domain/                          pure rules: review, status machine, visitor hash
   application/                     use cases + ports (interfaces)
   infrastructure/                  adapters: Upstash, Turnstile, Telegram, model, clock
   transport/                       FastAPI routers, request/response models, error mapping
+  config.py                        Settings (pydantic-settings, environment only)
   main.py                          composition root: create_app()
+  openapi_export.py                make openapi / make openapi-check
 backend/tests/
+backend/vulture_whitelist.py       schema fields only Pydantic reads
 pyproject.toml  uv.lock  .python-version  Makefile    repo root
 ```
 
-- Every `.py` file in `api/` becomes its own Vercel Function at the matching path
-  (`api/health.py` → `/api/health`) and must define a top-level `app`. Keep them to the two lines
-  above; nothing else goes in `api/`, because any other `.py` file there would also become a
-  function.
+- Every `.py` file in `api/` with a top-level `app` becomes its own Vercel Function. There is
+  exactly one, `api/index.py`, and a Vitest guard (`api-rewrites.test.ts`) fails if another
+  appears. Keep it to the two lines above.
 - Vercel's Python builder finds `pyproject.toml` and `uv.lock` by walking up from `api/` to the
   repo root, then runs `uv sync --frozen --no-dev --no-editable`: the `neuroctivity` package and
   its locked runtime dependencies are installed into the function. Dev dependencies never ship.
-- How the whole `/api` prefix is routed to one app (needed for `/api/docs` and
-  `/api/openapi.json` on Vercel) is decided in BRA-6.
+
+### Routing `/api/*` to one app (BRA-6)
+
+Under the Next.js preset, Vercel builds `api/*.py` files as separate functions and routes only
+their exact paths; any other `/api/*` path would get Next's HTML 404. So:
+
+1. `next.config.ts` rewrites `/api` and `/api/:path*` to `/api/index?__path=:path*` (defined once
+   in `src/shared/config/routes.ts` as `API_REWRITES`). Next overrides a client-sent `__path`.
+2. `RestoreForwardedPath` (transport) removes `__path` from the query and, **only when the app
+   sees `/api/index` or `/api/index.py`**, rebuilds the original path from it. If Vercel hands
+   the function the original path instead, the parameter is just dropped. Either way FastAPI
+   routes the real path, so 404 and 405 come from FastAPI in the error envelope.
+
+The path the function sees after a rewrite is not documented by Vercel; the middleware works for
+both cases, and the preview curls in the BRA-6 report check it. If the Next rewrite does not reach
+the function on Vercel, the fallback is a `vercel.json` with the same two rewrites (destination
+`/api/index?__path=$1`). It is not added unless needed, because Vercel recommends framework-native
+rewrites for Next.js.
+
+Rejected: one file per path (unknown paths become Next's HTML 404, every file cold-starts
+separately) and Vercel Services (Beta, needs a preset change and `vercel.json`).
 
 ## Guiding principles
 
@@ -160,13 +181,27 @@ The system boundary is where trust changes. Validate hard there, trust freely in
 
 ## Error handling
 
-- One error envelope for every endpoint: `{"error": {"code": "...", "message": "..."}}` with the
-  stable codes in [`api-contract.md`](api-contract.md). Do not invent codes outside it.
-- The client maps `code` to a translated message and never renders `message`.
-- Convert exceptions to the envelope in exactly one place (a transport-layer error mapper).
-  Domain and application code raise typed errors; the mapper picks the status and code.
-- Never leak internal detail (stack traces, provider error text) to the client. Log it, return
-  `internal`.
+- One error envelope for every response that is not a success, including Starlette's own 404 and
+  405, validation, an oversized body and an unhandled exception:
+  `{"error": {"code", "message", "fields"?: [{"field", "message", "reason"}]}}`. The codes and
+  reasons are the enums `ErrorCode` and `FieldReason` in `transport/errors.py`; their list is in
+  [`api-contract.md`](api-contract.md). Do not invent one outside it.
+- The client maps `code` and `reason` to translated messages and never renders `message`.
+- Conversion happens in one place: `transport/error_handlers.py` (typed errors, validation,
+  Starlette HTTP errors) and `ContainUnhandledErrors` in `transport/middleware.py` (anything
+  else). Domain and application code raise typed errors; the mapper picks the status and code.
+- Never leak internal detail. A validation error never echoes the submitted value. An unhandled
+  error is logged as `unhandled_error` with the exception **type** and the traceback, never its
+  message, which may contain review text or a provider response.
+- Every route declares its error statuses with `error_responses(...)`, so they are in the schema
+  and the contract tests can check them.
+
+### Middleware order
+
+Outermost first: `ApplyResponseDefaults` (`Cache-Control: no-store` unless the route set one,
+`X-Content-Type-Options: nosniff`) → `AnswerHeadAsGet` → `ContainUnhandledErrors` →
+`RestoreForwardedPath` → `LimitBodySize` (16 KiB, rejects before parsing). HEAD runs the GET route
+and drops the body, so headers and status are identical.
 
 ## Resilience
 
@@ -177,10 +212,26 @@ The system boundary is where trust changes. Validate hard there, trust freely in
 
 ## Configuration and secrets
 
-- All configuration from environment variables (Vercel project settings in production, a local
-  `.env` that is never committed; `.env.example` lists the names when the first one exists).
+- All configuration from environment variables through `neuroctivity.config.Settings`
+  (pydantic-settings). Vercel project settings in production; locally the shell or `make run`.
+  `.env.example` lists every name with no value.
 - Secrets never in source, never in logs, never in error responses.
-- Fail fast at startup if required configuration is missing.
+- A **malformed** value (for example `API_DOCS_ENABLED=banana`) fails at startup. A **missing**
+  provider secret does not stop the app: health and `/api/openapi.json` keep working, and the
+  endpoints that need it answer `503 service_unavailable` and log the missing variable names
+  (BRA-6 decision; lands with the providers in Phase 2).
+- `/api/docs` is served only when `API_DOCS_ENABLED=true` and `VERCEL` is unset. Swagger UI loads
+  from a CDN the CSP blocks, and the CSP is not loosened for it.
+
+### Redis client (decided in BRA-6, lands in Phase 2)
+
+The official `upstash-redis` client over Upstash's REST API: one HTTPS request per call, no
+connection pool to leak between invocations. It is configured with its own retries and telemetry
+off and an explicit timeout (its default is none). Every multi-step operation is a single Lua
+script, so counters never exist without a TTL. Upstash error text is never logged or returned.
+`upstash_redis` joins the forbidden lists of the domain and application contracts when it is
+added.
+
 - No magic numbers: timeouts, limits, TTLs and text bounds are named values.
 
 ## Statelessness
@@ -210,17 +261,18 @@ locally with the same command CI uses.
 No linter verifies SOLID. What CI can enforce are the measurable proxies that make violations
 expensive and visible; review still checks the principles themselves.
 
-| #   | Point                | Enforced by                                                   | CI job / `make` target      |
-| --- | -------------------- | ------------------------------------------------------------- | --------------------------- |
-| 1   | Formatter            | `ruff format --check`                                         | `backend` / `check`         |
-| 2   | Linter               | `ruff check` with `select = ["ALL"]`, any finding fails       | `backend` / `check`         |
-| 3   | Types                | `mypy` strict plus `disallow_any_explicit`; suppression guard | `backend` / `check`         |
-| 4   | Layering             | import-linter, three contracts in `pyproject.toml`            | `backend` / `check`         |
-| 5   | Complexity budget    | ruff `C901`, `PLR0913`, `PLR0915`, `PLR1702`                  | `backend` / `check`         |
-| 6   | Dead code            | `vulture` over `backend/src`                                  | `backend` / `check`         |
-| 7   | Tests                | pytest, including the transport tests                         | `backend` / `test`          |
-| 8   | Coverage floors      | `coverage report --fail-under`                                | `backend` / `coverage-gate` |
-| 9   | Dependency + secrets | `pip-audit` over `uv.lock`; `gitleaks` over the full history  | `backend-audit`, `secrets`  |
+| #   | Point                | Enforced by                                                     | CI job / `make` target      |
+| --- | -------------------- | --------------------------------------------------------------- | --------------------------- |
+| 1   | Formatter            | `ruff format --check`                                           | `backend` / `check`         |
+| 2   | Linter               | `ruff check` with `select = ["ALL"]`, any finding fails         | `backend` / `check`         |
+| 3   | Types                | `mypy` strict plus `disallow_any_explicit`; suppression guard   | `backend` / `check`         |
+| 4   | Layering             | import-linter, three contracts in `pyproject.toml`              | `backend` / `check`         |
+| 4a  | Contract drift       | `openapi_export --check` against `.claude/backend/openapi.json` | `backend` / `check`         |
+| 5   | Complexity budget    | ruff `C901`, `PLR0913`, `PLR0915`, `PLR1702`                    | `backend` / `check`         |
+| 6   | Dead code            | `vulture` over `backend/src`                                    | `backend` / `check`         |
+| 7   | Tests                | pytest, including the transport tests                           | `backend` / `test`          |
+| 8   | Coverage floors      | `coverage report --fail-under`                                  | `backend` / `coverage-gate` |
+| 9   | Dependency + secrets | `pip-audit` over `uv.lock`; `gitleaks` over the full history    | `backend-audit`, `secrets`  |
 
 1. **Formatter check** — no debate about style in review.
 2. **Linter, warnings are errors** — every ruff finding fails the build. The only rule families
@@ -232,9 +284,10 @@ expensive and visible; review still checks the principles themselves.
    pydantic plugin. `make guard` fails on any `# type: ignore`, `# mypy: ignore-errors`, `# noqa`,
    `# ruff: noqa` or `# pragma: no cover` under `backend/src`, `backend/tests` and `api`: the repo
    allows no comments, so a justification for a suppression cannot exist.
-4. **Layering** — three import-linter contracts: the layer order (`main` → `transport` |
-   `infrastructure` → `application` → `domain`), domain and application free of HTTP packages
-   (`fastapi`, `starlette`, `uvicorn`, `httpx`, `httpx2`), and a pure domain (no clock,
+4. **Layering** — three import-linter contracts: the layer order (`openapi_export` → `main` →
+   `config` → `transport` | `infrastructure` → `application` → `domain`), domain and application
+   free of HTTP and settings packages (`fastapi`, `starlette`, `uvicorn`, `httpx`, `httpx2`,
+   `pydantic_settings`), and a pure domain (no clock,
    randomness, serialisation, schema or I/O modules). When the Redis, Telegram or model SDKs
    arrive, they are added to the forbidden lists in the same change.
 5. **Complexity budget** — mirrors the frontend's (`eslint.config.ts`):
@@ -254,7 +307,8 @@ expensive and visible; review still checks the principles themselves.
    `backend/src`. Framework wiring is listed in `[tool.vulture]` rather than hidden: route
    handlers (`@router.*`), `model_config` and the `create_app` factory. `ignore_names` is global,
    so a new name goes there only when a framework calls it by name and it cannot be made visible
-   by passing it through a constant.
+   by passing it through a constant. Schema fields and enum members that only Pydantic reads are
+   named one by one in `backend/vulture_whitelist.py`; a new model field is added there.
 7. **Tests** — `make test` runs the whole suite with branch coverage.
 8. **Coverage floors** — `make coverage-gate`:
 

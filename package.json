@@ -16,7 +16,9 @@
     "format": "prettier --write .",
     "format:check": "prettier --check .",
     "test": "vitest run",
-    "ci": "pnpm typecheck && pnpm lint && pnpm format:check && pnpm test",
+    "api:generate": "openapi-typescript .claude/backend/openapi.json -o src/shared/api/generated/schema.ts",
+    "api:check": "pnpm api:generate --check",
+    "ci": "pnpm typecheck && pnpm lint && pnpm format:check && pnpm api:check && pnpm test",
     "prepare": "husky"
   },
   "dependencies": {
@@ -35,6 +37,7 @@
     "eslint-plugin-boundaries": "^7.4.5",
     "eslint-plugin-react-hooks": "^7.1.1",
     "husky": "^9.1.7",
+    "openapi-typescript": "7.13.0",
     "prettier": "^3.10.1",
     "tailwindcss": "^4.3.5",
     "typescript": "~6.0.3",

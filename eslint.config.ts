@@ -67,6 +67,7 @@ export default defineConfig(
     'public/**',
     'next-env.d.ts',
     '.venv/**',
+    'src/shared/api/generated/**',
   ]),
   ...tseslint.configs.recommended,
   nextPlugin.configs['core-web-vitals'],

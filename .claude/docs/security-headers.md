@@ -102,5 +102,8 @@ that are not the atlas revalidate on every request.
   these headers. The page they lead to does.
 - Cache rules match the exact file name. A percent-encoded spelling of a file is served with
   Next's default `public, max-age=0`.
-- `/api/docs` loads Swagger UI from a third-party host, which this policy blocks wherever it
-  applies to the API. The policy is not loosened for it; BRA-6 decides what happens to the docs.
+- `/api/docs` loads Swagger UI from a third-party host, which this policy blocks. It is therefore
+  not served on Vercel at all (BRA-6): only `make run` enables it locally, where these headers do
+  not apply. The policy is not loosened for it.
+- `/api/*` responses set their own `Cache-Control` (`no-store` by default) and
+  `X-Content-Type-Options`; see [`api-contract.md`](../backend/api-contract.md).

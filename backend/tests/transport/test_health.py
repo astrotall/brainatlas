@@ -6,16 +6,10 @@ import pytest
 from fastapi import FastAPI
 from fastapi.testclient import TestClient
 
-from neuroctivity.main import create_app
 from neuroctivity.transport import health
 
 HEALTH_URL = "/api/health"
-ENTRYPOINT = Path(__file__).resolve().parents[3] / "api" / "health.py"
-
-
-@pytest.fixture
-def client() -> TestClient:
-    return TestClient(create_app())
+ENTRYPOINT = Path(__file__).resolve().parents[3] / "api" / "index.py"
 
 
 def test_health_answers_ok_with_exactly_the_documented_body(client: TestClient) -> None:
@@ -33,13 +27,11 @@ def test_health_is_served_only_under_the_api_prefix(client: TestClient) -> None:
     assert client.get("/health").status_code == HTTPStatus.NOT_FOUND
 
 
-def test_schema_and_docs_live_under_the_api_prefix(client: TestClient) -> None:
+def test_the_schema_lives_under_the_api_prefix(client: TestClient) -> None:
     schema = client.get("/api/openapi.json")
 
     assert schema.status_code == HTTPStatus.OK
     assert HEALTH_URL in schema.json()["paths"]
-    assert client.get("/api/docs").status_code == HTTPStatus.OK
-    assert client.get("/docs").status_code == HTTPStatus.NOT_FOUND
     assert client.get("/openapi.json").status_code == HTTPStatus.NOT_FOUND
 
 

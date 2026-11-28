@@ -1,20 +1,20 @@
 import type { NextConfig } from 'next';
 import { PHASE_DEVELOPMENT_SERVER } from 'next/constants';
-import {
-  buildCacheHeaderRules,
-  buildSecurityHeaderRule,
-  LEGACY_REWRITES,
-} from './src/shared/config';
+import { buildCacheHeaderRules, buildRewrites, buildSecurityHeaderRule } from './src/shared/config';
 
-const nextConfig = (phase: string): NextConfig => ({
-  poweredByHeader: false,
-  headers: () =>
-    Promise.resolve([
-      buildSecurityHeaderRule({ isDevelopment: phase === PHASE_DEVELOPMENT_SERVER }),
-      ...buildCacheHeaderRules(),
-    ]),
-  rewrites: () =>
-    Promise.resolve(LEGACY_REWRITES.map(({ source, destination }) => ({ source, destination }))),
-});
+const nextConfig = (phase: string): NextConfig => {
+  const isDevelopmentServer = phase === PHASE_DEVELOPMENT_SERVER;
+  const isLocalDevelopment = isDevelopmentServer && process.env.NODE_ENV === 'development';
+
+  return {
+    poweredByHeader: false,
+    headers: () =>
+      Promise.resolve([
+        buildSecurityHeaderRule({ isDevelopment: isDevelopmentServer }),
+        ...buildCacheHeaderRules(),
+      ]),
+    rewrites: () => Promise.resolve(buildRewrites({ isLocalDevelopment })),
+  };
+};
 
 export default nextConfig;

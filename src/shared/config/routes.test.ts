@@ -3,7 +3,7 @@ import { describe, expect, it } from 'vitest';
 import nextConfig from '../../../next.config';
 import { PUBLIC_FILE, PUBLIC_FILES, toPublicPath } from './public-files';
 import type { PublicFile } from './public-files';
-import { LEGACY_REWRITES } from './routes';
+import { API_REWRITES, LEGACY_REWRITES } from './routes';
 import type { LegacyRewrite } from './routes';
 
 const BASE_URL = 'http://localhost';
@@ -60,7 +60,7 @@ const servedFile = (url: string, rewrites: readonly LegacyRewrite[]): PublicFile
 
 describe('legacy URLs', () => {
   it('registers exactly the rewrites defined in shared config', async () => {
-    expect(await loadRewrites()).toEqual(LEGACY_REWRITES);
+    expect(await loadRewrites()).toEqual([...LEGACY_REWRITES, ...API_REWRITES]);
   });
 
   it.each(LEGACY_URLS)('serves %s from %s', async (url, file) => {
